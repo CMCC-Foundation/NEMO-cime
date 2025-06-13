@@ -17,6 +17,7 @@ from CIME.case                   import Case
 from CIME.utils                  import expect
 from CIME.buildnml               import create_namelist_infile, parse_input
 from CIME.utils                  import run_cmd
+from CIME.namelist               import parse
 
 logger = logging.getLogger(__name__)
 
@@ -240,7 +241,7 @@ def buildnml(case, caseroot, compname):
     ndastp = int(ndastp1 + ndastp2 + ndastp3)
     hyb_rest = 1
     
-    if continue_run == True or run_type != "startup":
+    if continue_run == True:
         rstart = ".true."
         rstctl = 2
         msh = ".false." 
@@ -397,12 +398,30 @@ def buildnml(case, caseroot, compname):
 
     # 4. NEMO time step length, resolution dependent
 
-    if ocn_grid == "tn1v3":
-        DTSEC = 3600
-    elif ocn_grid == "tn0.25v3":
-        DTSEC = 1200
-    else:
-       expect(False, "%s is not a valid value in OCN_GRID for NEMO!" %ocn_grid) 
+    DTSEC = -1
+
+    # Let's first check if the time step length is set in the user_nl_* file
+    nml_cfg_user = os.path.join(caseroot, "user_nl_"+compname)
+    user_nl = parse(nml_cfg_user)
+    nle = ["",]
+    if "namdom" in user_nl.get_group_names():
+        if "rn_dt" in [v.lower() for v in user_nl.get_variable_names("namdom")]:
+            nle = user_nl.get_variable_value("namdom", "rn_dt")
+    #
+    if (len(nle[0])>0):
+        try:
+            DTSEC = int(nle[0])
+        except:
+            expect(False, "ERROR: problem parsing namelist variable 'rn_dt' in user namelist file "+nml_cfg_user) 
+
+    # Otherwise set the time step lenght based on the resolution
+    if DTSEC<=0:
+        if ocn_grid == "tn1v3":
+            DTSEC = 3600
+        elif ocn_grid == "tn0.25v3":
+            DTSEC = 1200
+        else:
+            expect(False, "%s is not a valid value in OCN_GRID for NEMO!" %ocn_grid) 
 
     # number of time steps per day
     ts_per_day = 86400 / DTSEC
