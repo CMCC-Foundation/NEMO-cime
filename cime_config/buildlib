@@ -2,7 +2,7 @@
 """
 CIME interface to build the nemo component library
 """
-import os, shutil, sys, glob, imp
+import os, shutil, sys, glob
 
 CIMEROOT = os.environ.get("CIMEROOT")
 if CIMEROOT is None:
