@@ -53,7 +53,7 @@ def buildnml(case, caseroot, compname):
     # Set source NEMO configuration, tools & data directories
     source_dir = os.path.join(srcroot, "components", compname)
     cfg_shared = os.path.join(source_dir, "nemocore", "cfgs", "SHARED") 
-    cfg_grid   = os.path.join(source_dir, "cfgs", ocn_grid) 
+    cfg_grid   = os.path.join(source_dir, "cfgs") 
     src_utils  = os.path.join(source_dir, "utils")
     nemo_in    = os.path.realpath(os.path.join(din_loc_root, "ocn", compname, ocn_grid))
 
@@ -68,27 +68,24 @@ def buildnml(case, caseroot, compname):
         os.makedirs(rundir)
 
     # Copy the basic reference & configuration nemo namelists
+    if not os.path.exists(os.path.join(confdir, "namelist_ref")):
+        _copy_file('namelist_ref', cfg_shared, confdir)
     nml_cfg = os.path.join(confdir, "namelist_cfg")
-    nml_ref = os.path.join(confdir, "namelist_ref")
     if not os.path.exists(nml_cfg):
         orig_cfg = os.path.join(cfg_grid, "namelist_cfg." + ocn_grid) 
         shutil.copy(orig_cfg, nml_cfg)
-    if not os.path.exists(nml_ref):
-        _copy_file('namelist_ref', cfg_shared, confdir)
 
     # Copy of NEMO tracer namelists if active TOP modules
     NEMO_TOP_AGE = 0 
     NEMO_TOP_CFC = 0
     ocn_pstr_modules = " ".join(nemo_top_mod.split())
     if ocn_pstr_modules:
-        top_cfg = os.path.join(confdir, "namelist_top_cfg")
-        top_ref = os.path.join(confdir, "namelist_top_ref") 
-        if not os.path.exists(top_cfg):
-            grid_cfg = "namelist_top_cfg." + ocn_grid
-            orig_cfg = os.path.join(cfg_grid, grid_cfg)
-            shutil.copy(orig_cfg, top_cfg)
-        if not os.path.exists(top_ref):
+        if not os.path.exists(os.path.join(confdir, "namelist_top_ref")):
             _copy_file('namelist_top_ref', cfg_shared, confdir)
+        top_cfg = os.path.join(confdir, "namelist_top_cfg")
+        if not os.path.exists(top_cfg):
+            orig_cfg = os.path.join(cfg_grid, "namelist_top_cfg." + ocn_grid)
+            shutil.copy(orig_cfg, top_cfg)
         for module in ocn_pstr_modules.split(" "):
             if module == "age":
                 NEMO_TOP_AGE = 1
@@ -113,15 +110,16 @@ def buildnml(case, caseroot, compname):
     iodef_nml = os.path.join(confdir, "iodef.xml")
     if not os.path.exists(iodef_nml):
         # First copy file from the SHARED folder
-        filenames = glob.glob(os.path.join(cfg_shared, '*.xml'))
-        for filename in filenames:
-            shutil.copy(filename, confdir)  
+        xml_files = ['axis_def_nemo.xml', 'domain_def_nemo.xml', 'field_def_nemo-oce.xml', 'grid_def_nemo.xml',]
+        for filename in xml_files:
+            shutil.copy(os.path.join(cfg_shared, filename), confdir)  
         # Then overwrite with configuration specific versions
-        filenames = glob.glob(os.path.join(cfg_grid, '*.xml'))
-        for filename in filenames:
-            shutil.copy(filename, confdir)  
+        xml_files = ['iodef.xml', 'context_cmcc.xml', 'file_def_nemo-oce.xml', 'context_nemo.xml.' + ocn_grid,]
+        for filename in xml_files:
+            orig_xml = filename.replace('.'+ocn_grid, '')
+            shutil.copy(os.path.join(cfg_grid, filename), os.path.join(confdir, orig_xml))  
  
-    # Copy of NEMO namelists into rundir directory
+    # Copy of NEMO namelists and XMLs into rundir directory
     filenames = glob.glob(os.path.join(confdir, 'namelist*'))
     for filename in filenames:
             shutil.copy(filename, rundir)
