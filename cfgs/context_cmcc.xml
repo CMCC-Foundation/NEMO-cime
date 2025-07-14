@@ -1,0 +1,145 @@
+<context id="nemo">
+
+<!-- CMCC additonal fields for NEMO physics -->
+
+<field_definition level="1" prec="4" operation="average" enabled=".TRUE." default_value="1.e20" > <!-- time step automaticaly defined -->
+
+<field_group id="grid_T" grid_ref="grid_T_2D" >
+
+    <field id="e3t_vsum300"  field_ref="e3t_300"            grid_ref="grid_T_vsum300"   detect_missing_value="true" />
+    <field id="e3t_2000"      field_ref="e3t"                grid_ref="grid_T_zoom_2000"       detect_missing_value="true" />
+    <field id="e3t_vsum2000"  field_ref="e3t_2000"            grid_ref="grid_T_vsum2000"   detect_missing_value="true" />
+    <field id="e3t_700"      field_ref="e3t"                grid_ref="grid_T_zoom_700"       detect_missing_value="true" />
+    <field id="e3t_vsum700"  field_ref="e3t_700"            grid_ref="grid_T_vsum700"   detect_missing_value="true" />
+    <field id="soce_e3t_300"      field_ref="soce_e3t"          unit="1e-3"     grid_ref="grid_T_zoom_300"      detect_missing_value="true" />
+    <field id="soce_e3t_vsum300"  field_ref="soce_e3t_300"      unit="1e-3*m"  grid_ref="grid_T_vsum300"  detect_missing_value="true" />
+    <field id="soce_vmean300"     field_ref="soce_e3t_vsum300"  unit="1e-3"     grid_ref="grid_T_vsum300"  detect_missing_value="true" > soce_e3t_vsum300/e3t_vsum300 </field>
+    <field id="toce_e3t_vsum300"  field_ref="toce_e3t_300"      unit="degress_C*m"  grid_ref="grid_T_vsum300"  detect_missing_value="true" />
+    <field id="toce_vmean300"     field_ref="toce_e3t_vsum300"  unit="degree_C"     grid_ref="grid_T_vsum300"  detect_missing_value="true" > toce_e3t_vsum300/e3t_vsum300 </field>
+    <field id="toce_e3t_2000"      field_ref="toce_e3t"          unit="degree_C"     grid_ref="grid_T_zoom_2000"      detect_missing_value="true" />
+    <field id="toce_e3t_vsum2000"  field_ref="toce_e3t_2000"      unit="degress_C*m"  grid_ref="grid_T_vsum2000"  detect_missing_value="true" />
+    <field id="toce_vmean2000"     field_ref="toce_e3t_vsum2000"  unit="degree_C"     grid_ref="grid_T_vsum2000"  detect_missing_value="true" > toce_e3t_vsum2000/e3t_vsum2000 </field>
+
+    <field id="toce_e3t_700"      field_ref="toce_e3t"          unit="degree_C"     grid_ref="grid_T_zoom_700"      detect_missing_value="true" />
+    <field id="toce_e3t_vsum700"  field_ref="toce_e3t_700"      unit="degress_C*m"  grid_ref="grid_T_vsum700"  detect_missing_value="true" />
+    <field id="toce_vmean700"     field_ref="toce_e3t_vsum700"  unit="degree_C"     grid_ref="grid_T_vsum700"  detect_missing_value="true" > toce_e3t_vsum700/e3t_vsum700 </field>
+
+    <field id="14d"          long_name="Depth of 14C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   axis_ref="iax_14C"/>
+    <field id="17d"          long_name="Depth of 17C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   axis_ref="iax_17C" />
+    <field id="hc40"        long_name="Heat content 0-40m"                            standard_name="integral_of_sea_water_potential_temperature_wrt_depth_expressed_as_heat_content"   unit="J/m2"                      />
+
+    <field id="mldr0_125"    long_name="Mixed Layer Depth dr=0.125 (ref.surf)"     unit="m"                        />
+    <field id="rhositu"      long_name="in situ density"                unit="kg/m3" grid_ref="grid_T_3D"  />
+
+</field_group>
+
+<field_group id="SBC" > <!-- time step automaticaly defined based on nn_fsbc -->
+
+  <field_group id="SBC_2D" grid_ref="grid_T_2D" >
+
+    <!-- available CCSMCOUPLED --> 
+    <field id="evap_x2o"     long_name="Total evaporation from Coupler"                               unit="kg/m2/s"  />
+    <field id="rain_x2o"     long_name="Total liquid precipitation (rain) from Coupler"               unit="kg/m2/s"  />
+    <field id="snow_x2o"     long_name="Total solid precipitation (snow) from Coupler"                unit="kg/m2/s"  />
+    <field id="prec_x2o"     long_name="Total precipitation (rain+snow) from Coupler"                 unit="kg/m2/s"  />
+    <field id="roff_x2o"     long_name="Runoff flux from Coupler"                                     unit="kg/m2/s"  />
+    <field id="ioff_x2o"     long_name="Ice runoff flux from Coupler due to Land Model Snow Capping"  unit="kg/m2/s"  />
+    <field id="meltw_x2o"    long_name="Water flux from Coupler due to sea ice/snow freezing/melting" unit="kg/m2/s"  />
+    <field id="salt_x2o"     long_name="Salt flux from Coupler"                                       unit="psu*kg/m2/s"  />
+    <field id="swnet_x2o"    long_name="Net shortwave heat flux from Coupler"                         unit="W/m2"  />
+    <field id="lwup_x2o"     long_name="Upward longwave heat flux from Coupler"                       unit="W/m2"  />
+    <field id="lwdn_x2o"     long_name="Downward longwave heat flux from Coupler"                     unit="W/m2"  />
+    <field id="lwnet_x2o"    long_name="Net Downward longwave heat flux from Coupler"                 unit="W/m2"  />
+    <field id="sen_x2o"      long_name="Sensible heat flux from Coupler"                              unit="W/m2"  />
+    <field id="lat_x2o"      long_name="Latent heat flux from Coupler"                                unit="W/m2"  />
+    <field id="melth_x2o"    long_name="Melting heat flux from Coupler"                               unit="W/m2"  />
+    <field id="sicew_x2o"    long_name="Seaice only water flux to ocean (from virtual salt flux)"     unit="W/m2"  />
+
+    <field id="So_u_o2x"     long_name="Sea surface zonal velocity (on T-points, to the coupler)"     unit="m/s"  />
+    <field id="So_v_o2x"     long_name="Sea surface meridional velocity (on T-points, to the coupler)" unit="m/s"  />
+    <field id="So_t_o2x"     long_name="Sea surface temperature (to the coupler)"                     unit="degC"  />
+    <field id="So_s_o2x"     long_name="Sea surface salinity (to the coupler)"                        unit="psu"  />
+    <field id="So_dhdx_o2x"  long_name="Sea surface gradient, zonal dir. (on T-points, to the coupler)"     unit="m/m"  />
+    <field id="So_dhdy_o2x"  long_name="Sea surface gradient, meridional dir. (on T-points, to the coupler)" unit="m/m"  />
+    <field id="So_qflux_o2x" long_name="Sea ice freezing/melting potential (to the coupler)"          unit="W/m2"  />
+
+  </field_group>
+
+</field_group> <!-- SBC -->
+
+
+<field_group id="grid_U"   grid_ref="grid_U_2D">
+    <field id="uocetr_eff_vsum"   long_name="vertical integral of effective ocean transport along i-axis"                 standard_name="ocean_volume_x_transport"    unit="m3/s"      field_ref="uocetr_eff"  grid_ref="grid_U_vsum" />
+    <field id="ueiv_masstr_vsum"   long_name="vertical integral of EIV Ocean Mass X Transport"            standard_name="bolus_ocean_mass_x_transport"                   unit="kg/s"  grid_ref="grid_U_vsum"     field_ref="ueiv_masstr" />
+</field_group>
+
+<field_group id="grid_V"   grid_ref="grid_V_2D">
+    <field id="vocetr_eff_vsum"   long_name="vertical integral of effective ocean transport along j-axis"                 standard_name="ocean_volume_y_transport"    unit="m3/s"      field_ref="vocetr_eff"  grid_ref="grid_V_vsum" />
+    <field id="veiv_masstr_vsum"   long_name="vertical integral of EIV Ocean Mass Y Transport"            standard_name="bolus_ocean_mass_y_transport"                   unit="kg/s"  grid_ref="grid_V_vsum"     field_ref="veiv_masstr" />
+    <field id="v_masstr_vint" long_name="vertical integral of ocean eulerian mass transport along j-axis" standard_name="vertical_integral_of_ocean_mass_y_transport"    unit="kg/s"   grid_ref="grid_V_2D_inner" />
+</field_group>
+
+<field_group id="grid_W" grid_ref="grid_W_3D">
+    <field id="wocetr_eff_vsum"   long_name="vertical integral of effective ocean vertical transport"                 standard_name="upward_ocean_mass_transport"    unit="m3/s"      field_ref="wocetr_eff"  grid_ref="grid_W_vsum" />
+    <field id="weiv_masstr_vsum"   long_name="vertical integral of EIV Upward Ocean Mass Transport"            standard_name="bolus_upward_ocean_mass_transport"                   unit="kg/s"  grid_ref="grid_W_vsum"     field_ref="weiv_masstr" />
+    <field id="w_masstr_vsum"  long_name="vertical integral of vertical mass transport" standard_name="upward_ocean_mass_transport"             unit="kg/s"  field_ref="w_masstr"  grid_ref="grid_W_vsum"  />
+</field_group>
+
+
+<field_group id="OCE_globalbudget"  grid_ref="grid_scalar" >
+    <field field_ref="scsshtst"             name="zostoga"     />
+</field_group>
+
+</field_definition>
+
+
+<!-- CMCC additonal axis for NEMO physics -->
+
+<axis_definition>
+  <axis id="iax_14C" long_name="14 degC isotherm"   unit="degC"            />
+  <axis id="iax_17C" long_name="17 degC isotherm"   unit="degC"            />
+</axis_definition>
+
+<!-- CMCC additonal grids for NEMO physics -->
+<grid_definition>
+  <grid id="grid_T_vsum300">
+    <domain domain_ref="grid_T"/>
+    <scalar>
+      <reduce_axis operation="sum" />
+    </scalar>
+  </grid>
+
+  <grid id="grid_T_vsum700">
+    <domain domain_ref="grid_T"/>
+    <scalar>
+      <reduce_axis operation="sum" />
+    </scalar>
+  </grid>
+
+  <grid id="grid_T_vsum2000">
+    <domain domain_ref="grid_T"/>
+    <scalar>
+      <reduce_axis operation="sum" />
+    </scalar>
+  </grid>
+
+  <grid id="grid_T_zoom_700">
+    <domain domain_ref="grid_T" />
+    <axis axis_ref="deptht700" />
+  </grid>
+
+  <grid id="grid_T_zoom_2000">
+    <domain domain_ref="grid_T" />
+    <axis axis_ref="deptht2000" />
+  </grid>
+
+  <grid id="grid_W_vsum">
+    <domain domain_ref="grid_W"/>
+    <scalar>
+      <reduce_axis operation="sum" />
+    </scalar>
+  </grid>
+
+</grid_definition>
+
+</context>
