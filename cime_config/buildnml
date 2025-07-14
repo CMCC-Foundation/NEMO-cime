@@ -51,7 +51,7 @@ def buildnml(case, caseroot, compname):
     comp_atm     = case.get_value("COMP_ATM")
 
     # Set source NEMO configuration, tools & data directories
-    source_dir = os.path.join(srcroot, "components", compname, "source")
+    source_dir = os.path.join(srcroot, "components", compname)
     cfg_shared = os.path.join(source_dir, "nemocore", "cfgs", "SHARED") 
     cfg_grid   = os.path.join(source_dir, "cfgs", ocn_grid) 
     src_utils  = os.path.join(source_dir, "utils")
