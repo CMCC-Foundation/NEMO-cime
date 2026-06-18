@@ -24,9 +24,9 @@
     <field id="toce_e3t_vsum700"  field_ref="toce_e3t_700"      unit="degress_C*m"  grid_ref="grid_T_vsum700"  detect_missing_value="true" />
     <field id="toce_vmean700"     field_ref="toce_e3t_vsum700"  unit="degree_C"     grid_ref="grid_T_vsum700"  detect_missing_value="true" > toce_e3t_vsum700/e3t_vsum700 </field>
 
-    <field id="14d"          long_name="Depth of 14C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   axis_ref="iax_14C"/>
-    <field id="17d"          long_name="Depth of 17C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   axis_ref="iax_17C" />
-    <field id="hc40"        long_name="Heat content 0-40m"                            standard_name="integral_of_sea_water_potential_temperature_wrt_depth_expressed_as_heat_content"   unit="J/m2"                      />
+    <field id="14d"          long_name="Depth of 14C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   />
+    <field id="17d"          long_name="Depth of 17C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   />
+    <field id="hc40"         long_name="Heat content 0-40m"                             standard_name="integral_of_sea_water_potential_temperature_wrt_depth_expressed_as_heat_content"   unit="J/m2"  />
 
     <field id="mldr0_125"    long_name="Mixed Layer Depth dr=0.125 (ref.surf)"     unit="m"                        />
     <field id="rhositu"      long_name="in situ density"                unit="kg/m3" grid_ref="grid_T_3D"  />
