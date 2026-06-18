@@ -74,8 +74,7 @@ def _build_nemo():
         objroot = case.get_value("OBJROOT")
         filepath_file = os.path.join(objroot, "ocn", "obj", "Filepath")
         if not os.path.isfile(filepath_file):
-            paths_nemo = [os.path.join(caseroot, "SourceMods", "src.nemo"), 
-                          os.path.join(srcroot, "components", "nemo", "interface", "src"),]
+            paths_nemo = [os.path.join(caseroot, "SourceMods", "src.nemo"),]
             base_path = os.path.join(srcroot, "components", "nemo", "nemocore", "src", "OCE")
             paths_nemo += [x[0] for x in os.walk(base_path)]             
 
@@ -90,7 +89,6 @@ def _build_nemo():
             if driver == 'mct':
                 paths_nemo.append(os.path.join(srcroot, "components", "nemo", "drivers", "cpl_share"))
                 paths_nemo.append(os.path.join(srcroot, "components", "nemo", "drivers", "cpl_mct"))
-            paths_nemo.append(os.path.join(srcroot, "components", "nemo", "interface", "ext"))
             paths_nemo.append(os.path.join(srcroot, "components", "nemo", "nemocore", "ext", "IOIPSL", "src"))
 
             with open(filepath_file, "w") as filepath:

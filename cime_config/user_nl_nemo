@@ -10,14 +10,12 @@
 !
 ! !  trends control print (expensive!)
 ! &namctl
-!    ln_ctl      = .false.
+!    ln_ctl      = .false.     !  trends control print (expensive!)
 ! /
-!
-! !   Massively Parallel Processing
-! &nammpp 
-!    jpni        =    15 
-!    jpnj        =    20 
-!    jpnij       =    256 
+! &nammpp        !   Massively Parallel Processing
+!    jpni        =    15    !  jpni   number of processors following i (set automatically if < 1)
+!    jpnj        =    20    !  jpnj   number of processors following j (set automatically if < 1)
+!    jpnij       =    256    !  jpnij  number of local domains (set automatically if < 1)
 ! /
 ! 
 ! IMPOTANT: Changes apply to namelist_cfg & namelist_top_cfg, if a user defined parameter 

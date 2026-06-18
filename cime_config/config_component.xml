@@ -2,7 +2,9 @@
 
 <entry_id version="3.0">
   <description modifier_mode="*">
-    <desc ocn="NEMO">NEMO version 4.2.0</desc>
+    <desc ocn="NEMO[%L50][%L75]">NEMO version 4.2.0</desc>
+    <desc option="L50"    >50 vertical levels configuration</desc>
+    <desc option="L75"    >75 vertical levels configuration</desc>
   </description>
 
   <entry id="COMP_OCN">
@@ -12,6 +14,30 @@
     <group>case_comp</group>
     <file>env_case.xml</file>
     <desc>Name of ocean component</desc>
+  </entry>
+
+  <entry id="NEMO_VERTICAL_GRID">
+    <type>char</type>
+    <valid_values>L50,L75</valid_values>
+    <default_value>L50</default_value>
+    <values match="last">
+      <value compset="_NEMO%L50"   >L50</value>
+      <value compset="_NEMO%L75"   >L75</value>
+      <value grid="tn0.25v3"       >L75</value>
+    </values>
+    <group>case_comp</group>
+    <file>env_case.xml</file>
+    <desc>NEMO vertical grid, number of vertical levels:
+           - L50: 50 vertical levels configuration
+           - L75: 75 vertical levels configuration
+          Possible combinations of horizontal and vertical grids:
+             Horiz.  : Vert.
+             - tn1   : L50 (default) or L75
+             - tn0.25: L75 (default)
+          Valid values are set based on the choice of horizontal and vertical grid,
+          and may override user's choice for the vertical grid (i.e. "tn0.25"
+          automatically sets L75 even if the user specify L50.
+    </desc>
   </entry>
 
   <entry id="NEMO_TOP_MODULES">

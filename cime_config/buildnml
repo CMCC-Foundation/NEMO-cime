@@ -5,7 +5,6 @@
 
 import os, shutil, sys, glob
 import subprocess
-from   netCDF4                   import Dataset
 
 CIMEROOT = os.environ.get("CIMEROOT")
 if CIMEROOT is None:
@@ -29,13 +28,14 @@ def buildnml(case, caseroot, compname):
 
     # Build the component namelist
     if compname != "nemo":
-        raise ValueError("compname != 'nemo' !")
+        expect(False, f"compname: {compname} != 'nemo' !")
 
     cimeroot     = case.get_value("CIMEROOT")
     srcroot      = case.get_value("SRCROOT")
     din_loc_root = case.get_value("DIN_LOC_ROOT")
     continue_run = case.get_value("CONTINUE_RUN")
     ocn_grid     = case.get_value("OCN_GRID")
+    nemo_vgrid   = case.get_value("NEMO_VERTICAL_GRID")
     run_type     = case.get_value("RUN_TYPE")
     run_refdate  = case.get_value("RUN_REFDATE")
     run_refcase  = case.get_value("RUN_REFCASE")
@@ -137,32 +137,40 @@ def buildnml(case, caseroot, compname):
 
     # Define initial and boundary conditions files
     if ocn_grid == "tn1v3": # ORCA1
-        DOMAIN        = "grid/ORCA1L50_domain_cfg.nc"
-        SUBBASINS     = "grid/ORCA1_subbasins_nohalo.nc"
-        #MASK_ITF      = "grid/ORCA1_maskITF_v1.0.nc"     # Indonesian Through Flow (???)
-        #
-        GEOTHERMAL    = "forcing/ORCA1_Goutorbe2011_heatflow_nomask.nc"
-        #K1ROWDRG      = "forcing/ORCA1_K1_v1.0_nohalo.nc"    # Needed by NEMO 4.2+ ?
-        #M2ROWDRG      = "forcing/ORCA1_M2_v1.0_nohalo.nc"    # Needed by NEMO 4.2+ ?
-        CHLOROPHYLL   = "forcing/ORCA1_ESACCIv4_chl_nomask.nc"
-        #AHMCOEF       = "forcing/ORCA1_ahmcoef_v1.0.nc"
-        #COORDINATES_XIOS = "grid/ORCA1_coordinates_xios.nc"
-        #DISTCOAST     = "no_distcoast_file.nc"
-        #SSSR          = "no_sssr_file.nc"
+        if nemo_vgrid is None:
+            nemo_vgrid = 'L50'
+        if nemo_vgrid not in ('L50','L75'):
+            expect(False, f'Unsupported combination of horizontal ("{ocn_grid}") and vertical ("{nemo_vgrid}") grids!')
+        DOMAIN        = f"grid/ORCA1{nemo_vgrid}_domain_cfg.nc"
+        SUBBASINS     = f"grid/ORCA1_subbasins_nohalo.nc"
+        #MASK_ITF      = f"grid/ORCA1_maskITF_v1.0.nc"     # Indonesian Through Flow (???)
+         #
+        GEOTHERMAL    = f"forcing/ORCA1_Goutorbe2011_heatflow_nomask.nc"
+        #K1ROWDRG      = f"forcing/ORCA1_K1_v1.0_nohalo.nc"    # Needed by NEMO 4.2+ ?
+        #M2ROWDRG      = f"forcing/ORCA1_M2_v1.0_nohalo.nc"    # Needed by NEMO 4.2+ ?
+        CHLOROPHYLL   = f"forcing/ORCA1_ESACCIv4_chl_nomask.nc"
+        #AHMCOEF       = f"forcing/ORCA1_ahmcoef_v1.0.nc"
+        #COORDINATES_XIOS = f"grid/ORCA1_coordinates_xios.nc"
+        #DISTCOAST     = f"no_distcoast_file.nc"
+        #SSSR          = f"no_sssr_file.nc"
       # WOA IC
-        TEMPERATURE   = "ic/ORCA1L50_woa18_thetao_nomask.nc"
-        SALINITY      = "ic/ORCA1L50_woa18_so_nomask.nc"
+        if nemo_vgrid == 'L50':
+            TEMPERATURE   = f"ic/ORCA1L50_woa18_thetao_nomask.nc"
+            SALINITY      = f"ic/ORCA1L50_woa18_so_nomask.nc"
+        else:
+            TEMPERATURE   = f"ic/WOA23-5564_ORCA1_{nemo_vgrid}_1m_potential_temperature_nomask.nc"
+            SALINITY      = f"ic/WOA23-5564_ORCA1_{nemo_vgrid}_1m_practical_salinity_nomask.nc"
     elif ocn_grid == "tn0.25v3":  # ORCA025
-        DOMAIN        = "grid/ORCA025L75_domain_cfg.nc"
-        SUBBASINS     = "grid/ORCA025L75_subbasins.nc"
+        if nemo_vgrid not in ('L75',):
+            expect(False, f'Unsupported combination of horizontal ("{ocn_grid}") and vertical ("{nemo_vgrid}") grids!')
+        DOMAIN        = f"grid/ORCA025{nemo_vgrid}_domain_cfg.nc"
+        SUBBASINS     = f"grid/ORCA025{nemo_vgrid}_subbasins.nc"
         #
-        CHLOROPHYLL   = "forcing/ORCA025L75_ESACCIv4_chl_nomask.nc"
-        GEOTHERMAL    = "forcing/ORCA025L75_Goutorbe2011_heatflow_nomask.nc"
-        #BATHYMETRY    = "grid/ORCA025_bathy_meter_tn0.25v3.nc"
+        CHLOROPHYLL   = f"forcing/ORCA025{nemo_vgrid}_ESACCIv4_chl_nomask.nc"
+        GEOTHERMAL    = f"forcing/ORCA025{nemo_vgrid}_Goutorbe2011_heatflow_nomask.nc"
       # WOA IC
-        TEMPERATURE   = "ic/ORCA025L75_woa18_thetao_nomask.nc"
-        SALINITY      = "ic/ORCA025L75_woa18_so_nomask.nc"
-    #elif ocn_grid == "Med-CORDEX.RP004":  # Med-CORDEX Rotated Pole grid at 1/24 of degree
+        TEMPERATURE   = f"ic/ORCA025{nemo_vgrid}_woa18_thetao_nomask.nc"
+        SALINITY      = f"ic/ORCA025{nemo_vgrid}_woa18_so_nomask.nc"
     else:
         expect(False, "grid %s is not a valid value in OCN_GRID!" %ocn_grid)
 
@@ -317,10 +325,8 @@ def buildnml(case, caseroot, compname):
 
         if len(flist)>0: 
             rd_rest = os.path.join(rundir, rest_file)
-            dataset = Dataset(rd_rest, mode='r')
-            Rlastkt = dataset.variables['kt'][:]
-            Rndastp = dataset.variables['ndastp'][:]
-            dataset.close()
+            Rlastkt = os.popen('ncdump -v kt ' + rd_rest + ' | grep \"kt.*=\" | cut -d\'=\' -f2 | sed -e \"s/[^0-9]//g\"').read()
+            Rndastp = os.popen('ncdump -v ndastp ' + rd_rest + ' | grep \"ndastp.*=\" | cut -d\'=\' -f2 | sed -e \"s/[^0-9]//g\"').read()
             lastkt = int(Rlastkt)
             ndastp = int(Rndastp)
             rstart = ".true."
@@ -469,6 +475,18 @@ def buildnml(case, caseroot, compname):
             else:
                 # 1 hours OCN-CPL coupling
                 nnfsbc = int(ts_per_day / ocn_ncpl)
+        elif ocn_ncpl == 48:
+            if ocn_grid != "tn0.25v3":
+                expect(False, "Error: wrong OCN_NCPL value %s for grid %s with time step %d}!" % (ocn_ncpl, ocn_grid, DTSEC))
+            else:
+                # 30 minutes OCN-CPL coupling
+                nnfsbc = int(ts_per_day / ocn_ncpl)
+        elif ocn_ncpl == 72:
+            if ocn_grid != "tn0.25v3":
+                expect(False, "Error: wrong OCN_NCPL value %s for grid %s with time step %d}!" % (ocn_ncpl, ocn_grid, DTSEC))
+            else:
+                # 20 minutes OCN-CPL coupling
+                nnfsbc = int(ts_per_day / ocn_ncpl)
         else:
             expect(False, "Error: OCN_NCPL %s invalid or not implemented yet!" % ocn_ncpl)
     else:
@@ -530,7 +548,7 @@ def buildnml(case, caseroot, compname):
         newnml.write("    nn_it000  = " + str(nit000) + "    !  first time step \n")
         newnml.write("    nn_itend  = " + str(nitend) + "    !  last  time step \n")
         newnml.write("    nn_date0  = " + date0 + "     !  date at nit_0000 (format yyyymmdd) \n")    
-        newnml.write("    nn_stock  = " + str(nstock) + "    !  frequency of creation of a restart file \n")
+        #newnml.write("    nn_stock  = " + str(nstock) + "    !  frequency of creation of a restart file \n")
         #newnml.write("    nn_write  = " + str(nstock) + "   !  frequency of write in the output file (no iomput) \n")
         newnml.write("    nn_rstctl = " + str(rstctl) + "    !  restart control ==> activated only if ln_rstart=T \n")
         newnml.write("    ln_rstart = " + rstart + "    !  start from rest (F) or from a restart file (T) \n")
