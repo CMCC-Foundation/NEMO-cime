@@ -215,7 +215,7 @@ module qflxice
 !
 !-----------------------------------------------------------------------
 
-   tlast_ice = tlast_ice + rdt
+   tlast_ice = tlast_ice + rn_dt
 
 !-----------------------------------------------------------------------
 !EOC
@@ -384,7 +384,7 @@ module qflxice
 
 !-----------------------------------------------------------------------
 !
-!  let any residual heat in the upper layer melt previously formed ice
+!  TODO: let any residual heat in the upper layer melt previously formed ice
 !
 !-----------------------------------------------------------------------
  
@@ -499,6 +499,7 @@ module qflxice
 !  adjust ice formation amount
 !
 !-----------------------------------------------------------------------
+
    AQICE(:,:) = AQICE(:,:)*0.5_wp  ! Adjust for leap-frog time stepping
 
 !-----------------------------------------------------------------------

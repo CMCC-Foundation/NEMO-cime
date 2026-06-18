@@ -867,7 +867,7 @@ contains
 !    call init_time_flag('cpl_diag_transp'  ,cpl_diag_transp,   owner = 'DataInitialize')
 !
 !    lsmft_avail = .true.
-!    tlast_coupled = c0
+    tlast_coupled = c0
 !
     !-----------------------------------------------------------------------
     ! initialize necessary coupling info
@@ -881,16 +881,16 @@ contains
 
     if (MOD(ocn_cpl_dt, INT(rn_Dt)) /= 0) then
        write(numout,*)' ocn_cpl_dt= ',ocn_cpl_dt, &
-                      '      rn_dt= ',INT(rn_Dt)
+                      '        rdt= ',INT(rn_Dt)
        if (lk_mpp) call mppsync       ! sync PEs
-       call shr_sys_abort('ocn_comp_nuopc: DataInitialize: ocn_cpl_dt must be an exact multiple of rn_dt')
+       call shr_sys_abort('ocn_comp_nuopc: DataInitialize: ocn_cpl_dt must be an exact multiple of rdt')
     end if
     ! # of model times step in one coupling time step
     nn_ncpl = ocn_cpl_dt/INT(rn_Dt)
     if (nn_ncpl /= nn_fsbc) then
        write(numout,*)' nn_ncpl= ',nn_ncpl, '  nn_fsbc= ', nn_fsbc
        if (lk_mpp) call mppsync       ! sync PEs
-       call shr_sys_abort('ocn_comp_nuopc: DataInitialize: nn_ncpl must be equal to nn_fsbc!')
+       call shr_sys_abort('ocn_comp_nuopc: DataInitialize: nn_ncpl_dt must be equal to nn_fsbc!')
     end if
     if (ldiag_cpl .AND. lwp) then
       write(numout,*) 'ocn_comp_nuopc: DataInitialize: coupling time step (sec)',  &
@@ -971,7 +971,7 @@ contains
 
        if (lwp .and. nstp/=0) then
           write(numout,*) ' Coupling frequency: ', nstp, ' model time steps'
-          write(numout,*) ' Advance NEMO 1 coupling time step for coupling synchronization'
+          write(numout,*) ' Advance NEMO nstp=', nstp, ' coupling time steps for coupling synchronization'
        end if
 
        do n=1, nstp
@@ -1005,7 +1005,7 @@ contains
 
        end do
 
-    end if ! ln_rstart
+    end if ! runtype == 'initial'
 
 #if (defined _MEMTRACE)
     if (iam  == 0) then
@@ -1076,6 +1076,9 @@ contains
 
     call ESMF_VMLogMemInfo("Entering "//trim(subname))
 
+    nitrst_old = 0
+    nproc = narea - 1
+
     !-----------------------------------------------------------------------
     ! skip first coupling interval for an initial run
     !-----------------------------------------------------------------------
@@ -1095,8 +1098,6 @@ contains
 
 !$  call omp_set_num_threads(nThreads)
 
-nitrst_old = 0
-nproc = narea - 1
 #if (defined _MEMTRACE)
     !if(my_task == 0 ) then
     if(nproc == 0 ) then
@@ -2233,30 +2234,40 @@ nproc = narea - 1
              ioff_x2o(i,j) = foxx_rofi(n) * med2mod_areacor(n)
        end do
     end do
+    roff_x2o(:,:) = roff_x2o(:,:)*tmask(:,:,1)
+    ioff_x2o(:,:) = ioff_x2o(:,:)*tmask(:,:,1)
     !roff_x2o = MAX(roff_x2o, 0.0_wp)
     !ioff_x2o = MAX(ioff_x2o, 0.0_wp)
-    if (ANY(roff_x2o(:,:)*tmask(:,:,1) < c0)) then
+    if (ANY(roff_x2o(:,:) < c0)) then
+       n = 0
        do j=Njs0,Nje0
           do i=Nis0,Nie0
+             n = n+1
              if (tmask(i,j,1)==1 .and. roff_x2o(i,j) < c0) then
-                write(numout,*)'ERROR: j,i,roff_x2o = ',&
-                     j,i,roff_x2o(i,j)
+                !write(numout,*)'ERROR: j,i,roff_x2o, foxx_rofl = ',&
+                write(numout,*)'WARING: NEGATIVE LIQUID RUNOFF: j,i,roff_x2o,foxx_rofl = ',&
+                     j,i,roff_x2o(i,j),foxx_rofl(n)
              end if
           enddo
        enddo
-       call shr_sys_abort('(set_surface_forcing) ERROR: roff_x2o is negative')
+       !call shr_sys_abort('(set_surface_forcing) ERROR: roff_x2o is negative')
     endif
 
-    if (ANY(ioff_x2o(:,:)*tmask(:,:,1) < c0)) then
+    if (ANY(ioff_x2o(:,:) < c0)) then
+       n = 0
        do j=Njs0,Nje0
           do i=Nis0,Nie0
+             n = n+1
              if (tmask(i,j,1)==1 .and. ioff_x2o(i,j) < c0) then
-                write(numout,*)'ERROR: j,i,ioff_x2o = ',&
-                     j,i,ioff_x2o(i,j)
+                write(numout,*)'WARNING: NEGATIVE ICE RUNOFF:j,i,ioff_x2o,foxx_rofi = ',&
+                     j,i,ioff_x2o(i,j),foxx_rofi(n)
              end if
           enddo
        enddo
-       call shr_sys_abort('(set_surface_forcing) ERROR: roff_x2o is negative')
+       !call shr_sys_abort('(set_surface_forcing) ERROR: ioff_x2o is negative')
+       !where (ioff_x2o(:,:)<c0)
+       !  ioff_x2o(:,:) = c0
+       !end where
     endif
 
     !-----------------------------------------------------------------------
@@ -2675,7 +2686,7 @@ nproc = narea - 1
        do j=Njs0,Nje0
          do i=Nis0,Nie0
             n = n + 1
-            dataptr1(n) = (sbuff_sum_co2(i,j)*tmask(i,j,1)/tlast_coupled) * mod2med_areacor(n) 
+            dataptr1(n) = (sbuff_sum_co2(i,j)/tlast_coupled) * mod2med_areacor(n) 
          enddo
       enddo
     endif
@@ -3063,6 +3074,8 @@ nproc = narea - 1
        !end if
        !sbuff_sum_s_depth(:,:,:) = c0
     end if
+
+    work = c0
 
     !-----------------------------------------------------------------------
     ! update time since last coupling
