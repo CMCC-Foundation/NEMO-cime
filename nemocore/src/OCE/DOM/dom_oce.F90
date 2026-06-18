@@ -82,6 +82,10 @@ MODULE dom_oce
 
    !                             !: domain MPP decomposition parameters
    INTEGER              , PUBLIC ::   nimpp, njmpp     !: i- & j-indexes for mpp-subdomain left bottom
+#if defined CCSMCOUPLED
+   INTEGER              , PUBLIC ::   nimppL, njmppL   !: i- & j-indexes for land mpp-subdomain left bottom
+   INTEGER              , PUBLIC ::   numsls           !: number of suppressed land-only subdomains
+#endif
    INTEGER              , PUBLIC ::   narea            !: number for local area (starting at 1) = MPI rank + 1
    INTEGER,               PUBLIC ::   nidom      !: IOIPSL things...
 
@@ -303,8 +307,6 @@ CONTAINS
       ii = ii+1
       ALLOCATE( r3t  (jpi,jpj,jpt) , r3u  (jpi,jpj,jpt) , r3v  (jpi,jpj,jpt) , r3f  (jpi,jpj) ,      &
          &      r3t_f(jpi,jpj)     , r3u_f(jpi,jpj)     , r3v_f(jpi,jpj)                      ,  STAT=ierr(ii) )
-         !
-      ii = ii+1
          !
 #elif defined key_linssh
          ! linear ssh no time varying coordinate arrays

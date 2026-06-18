@@ -187,7 +187,11 @@ CONTAINS
          DEALLOCATE( zgdept )
          !
       ENDIF
-
+#ifdef CCSMCOUPLED
+      IF( iom_use( 'rhositu' ) ) THEN
+         CALL iom_put( 'rhositu', (rhd+1._wp)*tmask*rho0 )
+      END IF
+#endif
       IF( iom_use( 'masstot' ) .OR. iom_use( 'temptot' )  .OR. iom_use( 'saltot' )  ) THEN
           !                                         ! Mean density anomalie, temperature and salinity
           ztsn(:,:,:,:) = 0._wp                    ! ztsn(:,:,1,jp_tem/sal) is used here as 2D Workspace for temperature & salinity
@@ -360,6 +364,7 @@ CONTAINS
       REAL(wp) ::   zztmp
       REAL(wp), ALLOCATABLE, DIMENSION(:,:,:,:) ::   zsaldta   ! Jan/Dec levitus salinity
       REAL(wp), ALLOCATABLE, DIMENSION(:,:)     ::   zvol0
+      CHARACTER(len=3) :: rsvn  ! variable name for reference salinity
       !
       !!----------------------------------------------------------------------
       !
@@ -392,13 +397,23 @@ CONTAINS
          DEALLOCATE( zvol0 )
 
          IF( iom_use( 'sshthster' ) ) THEN
-            ALLOCATE( zsaldta(jpi,jpj,jpk,jpts) )
+            rsvn = 'vosaline'
             CALL iom_open ( 'sali_ref_clim_monthly', inum )
-            CALL iom_get  ( inum, jpdom_global, 'vosaline' , zsaldta(:,:,:,1), 1  )
-            CALL iom_get  ( inum, jpdom_global, 'vosaline' , zsaldta(:,:,:,2), 12 )
+            IF (iom_varid(inum, TRIM(rsvn), ldstop=.FALSE.)/=0) THEN
+               rsvn = 'so'
+            END IF
+            ik = iom_getszuld(inum)
+            IF (ik>11) THEN
+               ALLOCATE( zsaldta(jpi,jpj,jpk,jpts) )
+               CALL iom_get  ( inum, jpdom_global, TRIM(rsvn) , zsaldta(:,:,:,1), 1  )
+               CALL iom_get  ( inum, jpdom_global, TRIM(rsvn) , zsaldta(:,:,:,2), 12 )
+               sn0(:,:,:) = 0.5_wp * ( zsaldta(:,:,:,1) + zsaldta(:,:,:,2) )
+               DEALLOCATE( zsaldta )
+            ELSE
+               CALL iom_get  ( inum, jpdom_global, TRIM(rsvn) , sn0(:,:,:), 1  )
+            END IF
             CALL iom_close( inum )
 
-            sn0(:,:,:) = 0.5_wp * ( zsaldta(:,:,:,1) + zsaldta(:,:,:,2) )
             sn0(:,:,:) = sn0(:,:,:) * tmask(:,:,:)
             IF( ln_zps ) THEN               ! z-coord. partial steps
                DO_2D( 1, 1, 1, 1 )          ! interpolation of salinity at the last ocean level (i.e. the partial step)
@@ -410,7 +425,6 @@ CONTAINS
                END_2D
             ENDIF
             !
-            DEALLOCATE( zsaldta )
          ENDIF
          !
       ENDIF

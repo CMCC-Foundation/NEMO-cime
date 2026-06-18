@@ -374,6 +374,11 @@ CONTAINS
 !!    (ii) requires that all restart outputs of updated variables by agrif (e.g. passive tracers/tke/barotropic arrays) are done at the same
 !!    place.
 !!
+#if defined CCSMCOUPLED
+      IF( lk_cesm   ) THEN
+                         CALL ice_formation ( kstp, Naa )  ! freezing/melting potential & T adjustment
+      END IF
+#endif
       IF( ln_dynspg_ts ) CALL mlf_baro_corr (            Nnn, Naa, uu, vv     )   ! barotrope adjustment
                          CALL finalize_lbc  ( kstp, Nbb     , Naa, uu, vv, ts )   ! boundary conditions
                          CALL tra_atf_qco   ( kstp, Nbb, Nnn, Naa        , ts )   ! time filtering of "now" tracer arrays
@@ -390,6 +395,9 @@ CONTAINS
       Nnn = Naa
       Naa = Nrhs
       !
+#if defined CCSMCOUPLED
+      IF( lk_cesm    )   CALL ice_flx_to_coupler( kstp, Nnn )
+#endif
       !
       IF( ln_diahsb  )   CALL dia_hsb       ( kstp, Nbb, Nnn )  ! - ML - global conservation diagnostics
 
@@ -440,7 +448,8 @@ CONTAINS
       !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       IF( lk_oasis .AND. nstop == 0 )   CALL sbc_cpl_snd( kstp, Nbb, Nnn )     ! coupled mode : field exchanges
       !
-#if defined key_xios
+      ! XIOS finalisation in cesm is done in ocn_final_mct
+#if !defined CCSMCOUPLED && defined key_xios
       !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       ! Finalize contextes if end of simulation or error detected
       !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

@@ -80,13 +80,19 @@ CONTAINS
 
 #  define GLOBSUM_CODE
 #     define DIM_1d
+#     define FUNCTION_GLOBSUM           glob_sum_1d
 #        include "lib_fortran_generic.h90"
+#     undef FUNCTION_GLOBSUM
 #     undef DIM_1d
 #     define DIM_2d
+#     define FUNCTION_GLOBSUM           glob_sum_2d
 #        include "lib_fortran_generic.h90"
+#     undef FUNCTION_GLOBSUM
 #     undef DIM_2d
 #     define DIM_3d
+#     define FUNCTION_GLOBSUM           glob_sum_3d
 #        include "lib_fortran_generic.h90"
+#     undef FUNCTION_GLOBSUM 
 #     undef DIM_3d
 #  undef GLOBSUM_CODE
 

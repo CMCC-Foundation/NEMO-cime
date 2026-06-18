@@ -141,9 +141,9 @@ CONTAINS
             sbc_tsc(ji,jj,jp_tem) = sbc_tsc(ji,jj,jp_tem) + r1_rho0 * emp(ji,jj) * pts(ji,jj,1,jp_tem,Kmm)
             sbc_tsc(ji,jj,jp_sal) = sbc_tsc(ji,jj,jp_sal) + r1_rho0 * emp(ji,jj) * pts(ji,jj,1,jp_sal,Kmm)
          END_2D                                 !==>> output c./d. term
-         IF( iom_use('emp_x_sst') )   CALL iom_put( "emp_x_sst", emp (:,:) * pts(:,:,1,jp_tem,Kmm) )
-         IF( iom_use('emp_x_sss') )   CALL iom_put( "emp_x_sss", emp (:,:) * pts(:,:,1,jp_sal,Kmm) )
       ENDIF
+      IF( iom_use('emp_x_sst') )   CALL iom_put( "emp_x_sst", emp (:,:) * pts(:,:,1,jp_tem,Kmm) )
+      IF( iom_use('emp_x_sss') )   CALL iom_put( "emp_x_sss", emp (:,:) * pts(:,:,1,jp_sal,Kmm) )
       !
       DO jn = 1, jpts               !==  update tracer trend  ==!
          DO_2D( 0, 0, 0, 0 )
@@ -164,7 +164,7 @@ CONTAINS
       !----------------------------------------
       !
       IF( ln_rnf ) THEN         ! input of heat and salt due to river runoff
-         zfact = 0.5_wp
+         !zfact = 0.5_wp
          DO_2D( 0, 0, 0, 0 )
             IF( rnf(ji,jj) /= 0._wp ) THEN
                zdep = zfact / h_rnf(ji,jj)
@@ -176,10 +176,16 @@ CONTAINS
                END DO
             ENDIF
          END_2D
-      ENDIF
 
-      IF( iom_use('rnf_x_sst') )   CALL iom_put( "rnf_x_sst", rnf*pts(:,:,1,jp_tem,Kmm) )   ! runoff term on sst
-      IF( iom_use('rnf_x_sss') )   CALL iom_put( "rnf_x_sss", rnf*pts(:,:,1,jp_sal,Kmm) )   ! runoff term on sss
+         IF( iom_use('rnf_x_sst') ) THEN
+            IF( ln_rnf_tem ) THEN                                       ! use runoffs temperature data
+               CALL iom_put( "rnf_x_sst", rnf*pts(:,:,1,jp_tem,Kmm) )   ! runoff term on sst
+            ELSE
+               CALL iom_put( "rnf_x_sst", rnf*MAX(pts(:,:,1,jp_tem,Kmm), 0._wp) )   ! runoff term on sst
+            ENDIF
+         ENDIF
+         IF( iom_use('rnf_x_sss') )   CALL iom_put( "rnf_x_sss", rnf*pts(:,:,1,jp_sal,Kmm) )   ! runoff term on sss
+      ENDIF
 
 #if defined key_asminc
       !

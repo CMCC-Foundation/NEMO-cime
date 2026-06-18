@@ -2034,11 +2034,11 @@ CONTAINS
       REAL(sp),     DIMENSION(:,:), INTENT(in) ::   pfield2d
       IF( iom_use(cdname) ) THEN
 #if defined key_xios
-         IF( is_tile(pfield2d) == 1 ) THEN
-            CALL xios_send_field( cdname, pfield2d, ntile - 1 )
-         ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
+         !IF( is_tile(pfield2d) == 1 ) THEN
+         !   CALL xios_send_field( cdname, pfield2d, ntile - 1 )
+         !ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
             CALL xios_send_field( cdname, pfield2d )
-         ENDIF
+         !ENDIF
 #else
          WRITE(numout,*) pfield2d   ! iom_use(cdname) = .F. -> useless test to avoid compilation warnings
 #endif
@@ -2050,11 +2050,11 @@ CONTAINS
       REAL(dp),     DIMENSION(:,:), INTENT(in) ::   pfield2d
       IF( iom_use(cdname) ) THEN
 #if defined key_xios
-         IF( is_tile(pfield2d) == 1 ) THEN
-            CALL xios_send_field( cdname, pfield2d, ntile - 1 )
-         ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
+         !IF( is_tile(pfield2d) == 1 ) THEN
+         !   CALL xios_send_field( cdname, pfield2d, ntile - 1 )
+         !ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
             CALL xios_send_field( cdname, pfield2d )
-         ENDIF
+         !ENDIF
 #else
          WRITE(numout,*) pfield2d   ! iom_use(cdname) = .F. -> useless test to avoid compilation warnings
 #endif
@@ -2066,9 +2066,10 @@ CONTAINS
       REAL(sp),       DIMENSION(:,:,:), INTENT(in) ::   pfield3d
       IF( iom_use(cdname) ) THEN
 #if defined key_xios
-         IF( is_tile(pfield3d) == 1 ) THEN
-            CALL xios_send_field( cdname, pfield3d, ntile - 1 )
-         ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
+         !IF( is_tile(pfield3d) == 1 ) THEN
+         !   CALL xios_send_field( cdname, pfield3d, ntile - 1 )
+         !ELSE 
+         IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
             CALL xios_send_field( cdname, pfield3d )
          ENDIF
 #else
@@ -2082,9 +2083,10 @@ CONTAINS
       REAL(dp),       DIMENSION(:,:,:), INTENT(in) ::   pfield3d
       IF( iom_use(cdname) ) THEN
 #if defined key_xios
-         IF( is_tile(pfield3d) == 1 ) THEN
-            CALL xios_send_field( cdname, pfield3d, ntile - 1 )
-         ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
+         !IF( is_tile(pfield3d) == 1 ) THEN
+         !   CALL xios_send_field( cdname, pfield3d, ntile - 1 )
+         !ELSE 
+         IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
             CALL xios_send_field( cdname, pfield3d )
          ENDIF
 #else
@@ -2098,9 +2100,10 @@ CONTAINS
       REAL(sp),       DIMENSION(:,:,:,:), INTENT(in) ::   pfield4d
       IF( iom_use(cdname) ) THEN
 #if defined key_xios
-         IF( is_tile(pfield4d) == 1 ) THEN
-            CALL xios_send_field( cdname, pfield4d, ntile - 1 )
-         ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
+         !IF( is_tile(pfield4d) == 1 ) THEN
+         !   CALL xios_send_field( cdname, pfield4d, ntile - 1 )
+         !ELSE 
+         IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
             CALL xios_send_field( cdname, pfield4d )
          ENDIF
 #else
@@ -2114,9 +2117,10 @@ CONTAINS
       REAL(dp),       DIMENSION(:,:,:,:), INTENT(in) ::   pfield4d
       IF( iom_use(cdname) ) THEN
 #if defined key_xios
-         IF( is_tile(pfield4d) == 1 ) THEN
-            CALL xios_send_field( cdname, pfield4d, ntile - 1 )
-         ELSE IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
+         !IF( is_tile(pfield4d) == 1 ) THEN
+         !   CALL xios_send_field( cdname, pfield4d, ntile - 1 )
+         !ELSE 
+         IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
             CALL xios_send_field( cdname, pfield4d )
          ENDIF
 #else
@@ -2151,18 +2155,18 @@ CONTAINS
       IF( xios_is_valid_domain     (cdid) ) THEN
          CALL xios_set_domain_attr     ( cdid, ni_glo=ni_glo, nj_glo=nj_glo, ibegin=ibegin, jbegin=jbegin, ni=ni, nj=nj,   &
             &    data_dim=data_dim, data_ibegin=data_ibegin, data_ni=data_ni, data_jbegin=data_jbegin, data_nj=data_nj ,   &
-            &    ntiles=ntiles, tile_ibegin=tile_ibegin, tile_jbegin=tile_jbegin, tile_ni=tile_ni, tile_nj=tile_nj,        &
-            &    tile_data_ibegin=tile_data_ibegin, tile_data_jbegin=tile_data_jbegin,                                     &
-            &    tile_data_ni=tile_data_ni, tile_data_nj=tile_data_nj,                                                     &
+            !&    ntiles=ntiles, tile_ibegin=tile_ibegin, tile_jbegin=tile_jbegin, tile_ni=tile_ni, tile_nj=tile_nj,        &
+            !&    tile_data_ibegin=tile_data_ibegin, tile_data_jbegin=tile_data_jbegin,                                     &
+            !&    tile_data_ni=tile_data_ni, tile_data_nj=tile_data_nj,                                                     &
             &    lonvalue_1D=lonvalue, latvalue_1D=latvalue, mask_1D=mask, nvertex=nvertex, bounds_lon_1D=bounds_lon,      &
             &    bounds_lat_1D=bounds_lat, area=area, type='curvilinear')
       ENDIF
       IF( xios_is_valid_domaingroup(cdid) ) THEN
          CALL xios_set_domaingroup_attr( cdid, ni_glo=ni_glo, nj_glo=nj_glo, ibegin=ibegin, jbegin=jbegin, ni=ni, nj=nj,   &
             &    data_dim=data_dim, data_ibegin=data_ibegin, data_ni=data_ni, data_jbegin=data_jbegin, data_nj=data_nj ,   &
-            &    ntiles=ntiles, tile_ibegin=tile_ibegin, tile_jbegin=tile_jbegin, tile_ni=tile_ni, tile_nj=tile_nj,        &
-            &    tile_data_ibegin=tile_data_ibegin, tile_data_jbegin=tile_data_jbegin,                                     &
-            &    tile_data_ni=tile_data_ni, tile_data_nj=tile_data_nj,                                                     &
+            !&    ntiles=ntiles, tile_ibegin=tile_ibegin, tile_jbegin=tile_jbegin, tile_ni=tile_ni, tile_nj=tile_nj,        &
+            !&    tile_data_ibegin=tile_data_ibegin, tile_data_jbegin=tile_data_jbegin,                                     &
+            !&    tile_data_ni=tile_data_ni, tile_data_nj=tile_data_nj,                                                     &
             &    lonvalue_1D=lonvalue, latvalue_1D=latvalue, mask_1D=mask, nvertex=nvertex, bounds_lon_1D=bounds_lon,      &
             &    bounds_lat_1D=bounds_lat, area=area, type='curvilinear' )
       ENDIF

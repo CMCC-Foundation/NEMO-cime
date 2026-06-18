@@ -562,7 +562,7 @@ CONTAINS
          IF( ln_mxl0 ) THEN            ! surface mixing length = F(stress) : l=vkarmn*2.e5*taum/(rho0*g)
          !
             zraug = vkarmn * 2.e5_wp / ( rho0 * grav )
-#if ! defined key_si3 && ! defined key_cice
+#if ! defined key_si3 && ! defined key_cice && ! defined CCSMCOUPLED
             DO_2D( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1 )                  ! No sea-ice
                zmxlm(ji,jj,1) =  zraug * taum(ji,jj) * tmask(ji,jj,1)
             END_2D
@@ -592,6 +592,7 @@ CONTAINS
 #endif
                END_2D
                !
+#if defined key_cice
             CASE( 3 )                      ! scaling with max sea-ice thickness
                DO_2D( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1 )
                   zmaxice = MAXVAL( h_i(ji,jj,:) )
@@ -599,6 +600,7 @@ CONTAINS
                      &                         fr_i(ji,jj)   * zmaxice             ) * tmask(ji,jj,1)
                END_2D
                !
+#endif
             END SELECT
 #endif
             !
