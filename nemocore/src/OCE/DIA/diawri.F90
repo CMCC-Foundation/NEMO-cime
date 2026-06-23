@@ -1163,9 +1163,102 @@ CONTAINS
       CALL iom_rstput( 0, 0, inum, 'sossheig', ssh(:,:,Kmm)         )    ! sea surface height
       CALL iom_rstput( 0, 0, inum, 'vozocrtx', uu(:,:,:,Kmm)        )    ! now i-velocity
       CALL iom_rstput( 0, 0, inum, 'vomecrty', vv(:,:,:,Kmm)        )    ! now j-velocity
+      IF( ln_zad_Aimp ) THEN
+         DO_3D( 0, 0, 0, 0, 1, jpk )
+           z3d(ji,jj,jk) = ww(ji,jj,jk) + wi(ji,jj,jk)
+         END_3D
+         CALL iom_rstput( 0, 0, inum, 'vovecrtz', z3d            )    ! now k-velocity
+      ELSE
+         CALL iom_rstput( 0, 0, inum, 'vovecrtz', ww             )    ! now k-velocity
+      ENDIF
+      CALL iom_rstput( 0, 0, inum, 'risfdep', risfdep            )
+      CALL iom_rstput( 0, 0, inum, 'ht'     , ht(:,:)            )    ! now water column height
+      !
+      IF ( ln_isf ) THEN
+         IF (ln_isfcav_mlt) THEN
+            CALL iom_rstput( 0, 0, inum, 'fwfisf_cav', fwfisf_cav          )
+            CALL iom_rstput( 0, 0, inum, 'rhisf_cav_tbl', rhisf_tbl_cav    )
+            CALL iom_rstput( 0, 0, inum, 'rfrac_cav_tbl', rfrac_tbl_cav    )
+            CALL iom_rstput( 0, 0, inum, 'misfkb_cav', REAL(misfkb_cav,wp) )
+            CALL iom_rstput( 0, 0, inum, 'misfkt_cav', REAL(misfkt_cav,wp) )
+            CALL iom_rstput( 0, 0, inum, 'mskisf_cav', REAL(mskisf_cav,wp), ktype = jp_i1 )
+         END IF
+         IF (ln_isfpar_mlt) THEN
+            CALL iom_rstput( 0, 0, inum, 'isfmsk_par', REAL(mskisf_par,wp) )
+            CALL iom_rstput( 0, 0, inum, 'fwfisf_par', fwfisf_par          )
+            CALL iom_rstput( 0, 0, inum, 'rhisf_par_tbl', rhisf_tbl_par    )
+            CALL iom_rstput( 0, 0, inum, 'rfrac_par_tbl', rfrac_tbl_par    )
+            CALL iom_rstput( 0, 0, inum, 'misfkb_par', REAL(misfkb_par,wp) )
+            CALL iom_rstput( 0, 0, inum, 'misfkt_par', REAL(misfkt_par,wp) )
+            CALL iom_rstput( 0, 0, inum, 'mskisf_par', REAL(mskisf_par,wp), ktype = jp_i1 )
+         END IF
+      END IF
+      !
+      IF( ALLOCATED(ahtu) ) THEN
+         CALL iom_rstput( 0, 0, inum,  'ahtu', ahtu              )    ! aht at u-point
+         CALL iom_rstput( 0, 0, inum,  'ahtv', ahtv              )    ! aht at v-point
+      ENDIF
+      IF( ALLOCATED(ahmt) ) THEN
+         CALL iom_rstput( 0, 0, inum,  'ahmt', ahmt              )    ! ahmt at u-point
+         CALL iom_rstput( 0, 0, inum,  'ahmf', ahmf              )    ! ahmf at v-point
+      ENDIF
+      DO_2D( 0, 0, 0, 0 )
+         z2d(ji,jj) = emp(ji,jj) - rnf(ji,jj)
+      END_2D
+      CALL iom_rstput( 0, 0, inum, 'sowaflup', z2d               )    ! freshwater budget
+      DO_2D( 0, 0, 0, 0 )
+         z2d(ji,jj) = qsr(ji,jj) + qns(ji,jj)
+      END_2D
+      CALL iom_rstput( 0, 0, inum, 'sohefldo', z2d               )    ! total heat flux
+      CALL iom_rstput( 0, 0, inum, 'soshfldo', qsr               )    ! solar heat flux
+      CALL iom_rstput( 0, 0, inum, 'soicecov', fr_i              )    ! ice fraction
+      CALL iom_rstput( 0, 0, inum, 'sozotaux', utau              )    ! i-wind stress
+      CALL iom_rstput( 0, 0, inum, 'sometauy', vtau              )    ! j-wind stress
+      IF(  .NOT.ln_linssh  ) THEN
+         DO_3D( 0, 0, 0, 0, 1, jpk )
+           z3d(ji,jj,jk) = gdept(ji,jj,jk,Kmm)   ! 3D workspace for qco substitution
+         END_3D
+         CALL iom_rstput( 0, 0, inum, 'vovvldep', z3d            )    !  T-cell depth 
+         DO_3D( 0, 0, 0, 0, 1, jpk )
+           z3d(ji,jj,jk) = e3t(ji,jj,jk,Kmm)     ! 3D workspace for qco substitution
+         END_3D
+         CALL iom_rstput( 0, 0, inum, 'vovvle3t', z3d            )    !  T-cell thickness  
+      END IF
+      IF( ln_wave .AND. ln_sdw ) THEN
+         CALL iom_rstput( 0, 0, inum, 'sdzocrtx', usd            )    ! now StokesDrift i-velocity
+         CALL iom_rstput( 0, 0, inum, 'sdmecrty', vsd            )    ! now StokesDrift j-velocity
+         CALL iom_rstput( 0, 0, inum, 'sdvecrtz', wsd            )    ! now StokesDrift k-velocity
+      ENDIF
+      IF ( ln_abl ) THEN
+         CALL iom_rstput ( 0, 0, inum, "uz1_abl",   u_abl(:,:,2,nt_a  ) )   ! now first level i-wind
+         CALL iom_rstput ( 0, 0, inum, "vz1_abl",   v_abl(:,:,2,nt_a  ) )   ! now first level j-wind
+         CALL iom_rstput ( 0, 0, inum, "tz1_abl",  tq_abl(:,:,2,nt_a,1) )   ! now first level temperature
+         CALL iom_rstput ( 0, 0, inum, "qz1_abl",  tq_abl(:,:,2,nt_a,2) )   ! now first level humidity
+      ENDIF
+      IF( ln_zdfosm ) THEN
+         CALL iom_rstput( 0, 0, inum, 'hbl', hbl*tmask(:,:,1)  )      ! now boundary-layer depth
+         CALL iom_rstput( 0, 0, inum, 'hml', hml*tmask(:,:,1)  )      ! now mixed-layer depth
+         CALL iom_rstput( 0, 0, inum, 'avt_k', avt_k*wmask     )      ! w-level diffusion
+         CALL iom_rstput( 0, 0, inum, 'avm_k', avm_k*wmask     )      ! now w-level viscosity
+         CALL iom_rstput( 0, 0, inum, 'ghamt', ghamt*wmask     )      ! non-local t forcing
+         CALL iom_rstput( 0, 0, inum, 'ghams', ghams*wmask     )      ! non-local s forcing
+         CALL iom_rstput( 0, 0, inum, 'ghamu', ghamu*umask     )      ! non-local u forcing
+         CALL iom_rstput( 0, 0, inum, 'ghamv', ghamv*vmask     )      ! non-local v forcing
+         IF( ln_osm_mle ) THEN
+            CALL iom_rstput( 0, 0, inum, 'hmle', hmle*tmask(:,:,1)  ) ! now transition-layer depth
+         END IF
+      ENDIF
       !
       CALL iom_close( inum )
       ! 
+#if defined key_si3
+      IF( nn_ice == 2 ) THEN   ! condition needed in case agrif + ice-model but no-ice in child grid
+         CALL iom_open( TRIM(cdfile_name)//'_ice', inum, ldwrt = .TRUE., kdlev = jpl, cdcomp = 'ICE' )
+         CALL ice_wri_state( inum )
+         CALL iom_close( inum )
+      ENDIF
+      !
+#endif
    END SUBROUTINE dia_wri_state
 
    !!======================================================================
