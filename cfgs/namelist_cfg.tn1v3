@@ -31,7 +31,7 @@
    cn_ocerst_indir = "."       !  directory from which to read input ocean restarts
    cn_ocerst_out = "restart"   !  suffix of ocean restart name (output)
    cn_ocerst_outdir = "."      !  directory in which to write output ocean restarts
-   nn_stock    =  960          !  frequency of creation of a restart file (modulo referenced to 1)
+   nn_stock    =  0            !  frequency of creation of a restart file (modulo referenced to 1)
    ln_clobber  = .true.        !  clobber (overwrite) an existing file
 /
 !-----------------------------------------------------------------------
@@ -50,7 +50,7 @@
       !                      !  (=F) user defined configuration           (F => create/check namusr_def)
       cn_domcfg = "domain_cfg"  ! domain configuration filename
       !
-      ln_closea    = .false. !  (=T => fill namclo)
+      ln_closea    = .true.  !  (=T => fill namclo)
       !                      !  (=F) no control of net precip/evap over closed sea
 /
 !-----------------------------------------------------------------------
@@ -209,7 +209,7 @@
 !-----------------------------------------------------------------------
 &namlbc        !   lateral momentum boundary condition                  (default: NO selection)
 !-----------------------------------------------------------------------
-   rn_shlat    =    0.5     !  no slip
+   rn_shlat    =    0.0     !  no slip
 /
 !-----------------------------------------------------------------------
 &namagrif      !  AGRIF zoom                                            ("key_agrif")
@@ -321,7 +321,7 @@
       nn_aei_ijk_t    = 20          !  space/time variation of eddy coefficient:
       !                             !   = 20 F(i,j)    =ldf_c2d
       !                        !  time invariant coefficients:  aei0 = 1/2  Ue*Le
-      rn_Ue         = 0.02           !  lateral diffusive velocity [m/s] (nn_aht_ijk_t= 0, 10, 20, 30)
+      rn_Ue         = 0.018          !  lateral diffusive velocity [m/s] (nn_aht_ijk_t= 0, 10, 20, 30)
       !rn_Le        = 200.e+3        !  lateral diffusive length   [m]   (nn_aht_ijk_t= 0, 10)
       !
       ln_ldfeiv_dia =.false.   ! diagnose eiv stream function and velocities
@@ -390,7 +390,7 @@
    !                       !  Direction of action  :
    ln_dynldf_hor = .true.     !  horizontal  (geopotential)
    !                       !  Coefficient
-   nn_ahm_ijk_t  = 30         !  space/time variation of eddy coef
+   nn_ahm_ijk_t  = 20         !  space/time variation of eddy coef
       !                        !  time invariant coefficients :  ahm = 1/2  Uv*Lv   (lap case)
       !                             !                            or  = 1/12 Uv*Lv^3 (blp case)
       rn_Uv      = 0.18             !  lateral viscous velocity [m/s] (nn_ahm_ijk_t= 0, 10, 20, 30)
@@ -421,8 +421,8 @@
    rn_evd   =   10.           !  evd mixing coefficient [m2/s]
    !
    !                       !  Coefficients
-   rn_avm0     =   1.2e-4     !  vertical eddy viscosity   [m2/s]       (background Kz if ln_zdfcst=F)
-   rn_avt0     =   1.2e-5     !  vertical eddy diffusivity [m2/s]       (background Kz if ln_zdfcst=F)
+   rn_avm0     =   1.0e-4     !  vertical eddy viscosity   [m2/s]       (background Kz if ln_zdfcst=F)
+   rn_avt0     =   1.0e-5     !  vertical eddy diffusivity [m2/s]       (background Kz if ln_zdfcst=F)
    nn_avb      =    0         !  profile for background avt & avm (=1) or not (=0)
    nn_havtb    =    1         !  horizontal shape for avtb (=1) or not (=0)
    !
@@ -436,9 +436,13 @@
    rn_ediff    =   0.1     !  coef. for vertical eddy coef. (avt=rn_ediff*mxl*sqrt(e) )
    rn_ediss    =   0.7     !  coef. of the Kolmogoroff dissipation
    rn_ebb      =  60.0     !  coef. of the surface input of tke (=67.83 suggested when ln_mxl0=T)
+   rn_emin     =   1.e-6   !  minimum value of tke [m2/s2]
+   rn_emin0    =   1.e-4   !  surface minimum value of tke [m2/s2]
    nn_mxl      =   3       !
    ln_mxl0     = .true.    !  surface mixing length scale = F(wind stress) (T) or not (F)
    rn_mxl0     =   0.01    !  surface  buoyancy lenght scale minimum value
+   nn_etau     =   1       !  penetration of tke below the mixed layer (ML) due to NIWs
+   rn_efr      =   0.01    !  fraction of surface tke value which penetrates below the ML (nn_etau=1 or 2)
 /
 !!======================================================================
 !!                  ***  Diagnostics namelists  ***                   !!
