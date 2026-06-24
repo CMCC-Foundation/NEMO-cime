@@ -136,10 +136,10 @@ def buildnml(case, caseroot, compname):
         _copy_file('postrun_tpl', src_utils, confdir)
 
     # Define initial and boundary conditions files
-    if ocn_grid == "tn1v3": # ORCA1
+    if ocn_grid in ["tn1v3", "tn1v4"]: # ORCA1
         if nemo_vgrid is None:
-            nemo_vgrid = 'L50'
-        if nemo_vgrid not in ('L50','L75'):
+            nemo_vgrid = 'L75'
+        if nemo_vgrid not in ['L50','L75']:
             expect(False, f'Unsupported combination of horizontal ("{ocn_grid}") and vertical ("{nemo_vgrid}") grids!')
         DOMAIN        = f"grid/ORCA1{nemo_vgrid}_domain_cfg.nc"
         SUBBASINS     = f"grid/ORCA1_subbasins_nohalo.nc"
@@ -420,7 +420,7 @@ def buildnml(case, caseroot, compname):
 
     # Otherwise set the time step lenght based on the resolution
     if DTSEC<=0:
-        if ocn_grid == "tn1v3":
+        if ocn_grid in ["tn1v3", "tn1v4"]:
             DTSEC = 3600
         elif ocn_grid == "tn0.25v3":
             DTSEC = 1200
@@ -440,25 +440,25 @@ def buildnml(case, caseroot, compname):
             # Daily OCN-CPL coupling
             nnfsbc = int(ts_per_day)
         elif ocn_ncpl == 4:
-            if ocn_grid != "tn1v3":
+            if ocn_grid not in ["tn1v3", "tn1v4"]:
                 expect(False, "Error: wrong OCN_NCPL value %s for grid %s with time step %d}!" % (ocn_ncpl, ocn_grid, DTSEC))
             else:
                 # 6 hours OCN-CPL coupling
                 nnfsbc = int(ts_per_day / ocn_ncpl)
         elif ocn_ncpl == 6: 
-            if ocn_grid != "tn1v3":
+            if ocn_grid not in ["tn1v3", "tn1v4"]:
                 expect(False, "Error: wrong OCN_NCPL value %s for grid %s with time step %d}!" % (ocn_ncpl, ocn_grid, DTSEC))
             else:
                 # 4 hours OCN-CPL coupling
                 nnfsbc = int(ts_per_day / ocn_ncpl)
         elif ocn_ncpl == 8:
-            if ocn_grid != "tn1v3" and ocn_grid != "tn0.25v3":
+            if ocn_grid not in ["tn1v3", "tn1v4", "tn0.25v3"]:
                 expect(False, "Error: wrong OCN_NCPL value %s for grid %s with time step %d}!" % (ocn_ncpl, ocn_grid, DTSEC))
             else:
                 # 3 hours OCN-CPL coupling
                 nnfsbc = int(ts_per_day / ocn_ncpl)
         elif ocn_ncpl == 12:
-            if ocn_grid != "tn1v3" and ocn_grid != "tn0.25v3":
+            if ocn_grid not in ["tn1v3", "tn1v4", "tn0.25v3"]:
                 expect(False, "Error: wrong OCN_NCPL value %s for grid %s with time step %d}!" % (ocn_ncpl, ocn_grid, DTSEC))
             else:
                 # 2 hours OCN-CPL coupling
@@ -470,7 +470,7 @@ def buildnml(case, caseroot, compname):
                 # 1.5 hours OCN-CPL coupling
                 nnfsbc = int(ts_per_day / ocn_ncpl)
         elif ocn_ncpl == 24:
-            if ocn_grid != "tn1v3" and ocn_grid != "tn0.25v3":
+            if ocn_grid not in ["tn1v3", "tn1v4", "tn0.25v3"]:
                 expect(False, "Error: wrong OCN_NCPL value %s for grid %s with time step %d}!" % (ocn_ncpl, ocn_grid, DTSEC))
             else:
                 # 1 hours OCN-CPL coupling
