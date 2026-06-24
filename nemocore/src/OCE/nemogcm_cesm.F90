@@ -187,7 +187,7 @@ CONTAINS
       !                             !---------------------------------------------------------------!
       !
       ! open ocean.output as soon as possible to get all output prints (including errors messages)
-      IF( lwm )   CALL ctl_opn(     numout,        'ocean.output', 'REPLACE', 'FORMATTED', 'SEQUENTIAL', -1, -1, .FALSE. )
+      !IF( lwm )   CALL ctl_opn(     numout,        'ocean.output', 'REPLACE', 'FORMATTED', 'SEQUENTIAL', -1, -1, .FALSE. )
       ! open reference and configuration namelist files
                   CALL load_nml( numnam_ref,        'namelist_ref',                                           -1, lwm )
                   CALL load_nml( numnam_cfg,        'namelist_cfg',                                           -1, lwm )
