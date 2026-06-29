@@ -62,6 +62,7 @@
     <field id="So_dhdx_o2x"  long_name="Sea surface gradient, zonal dir. (on T-points, to the coupler)"     unit="m/m"  />
     <field id="So_dhdy_o2x"  long_name="Sea surface gradient, meridional dir. (on T-points, to the coupler)" unit="m/m"  />
     <field id="So_qflux_o2x" long_name="Sea ice freezing/melting potential (to the coupler)"          unit="W/m2"  />
+    <field id="co2_x2o"      long_name="atmospheric CO2 mixing ratio from Coupler"                    unit="kg/kg" />
 
   </field_group>
 

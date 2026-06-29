@@ -677,6 +677,9 @@ CONTAINS
             END_2D
             CALL iom_put( "precip", z2d  )
          ENDIF
+#if defined key_cpl_carbon_cycle
+         CALL iom_put("co2_x2o", co2_x2o )   ! co2 mixing
+#endif
 #else
          IF( nn_ice > 0 .OR. ll_opa )   CALL iom_put( "ice_cover", fr_i )   ! ice fraction
 #endif
