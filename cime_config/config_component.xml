@@ -42,11 +42,11 @@
 
   <entry id="NEMO_TOP_MODULES">
     <type>char</type>
-    <valid_values> ,age,cfc,c14</valid_values> 
+    <valid_values> bfm,age,cfc,c14</valid_values> 
     <default_value></default_value> 
     <group>build_component_nemo</group>
     <file>env_build.xml</file>
-    <desc>Optional NEMO ocean tracers. Valid values are Any combination of: age cfc</desc>
+    <desc>Activte NEMO passive tracers and ocean biogeochemistry. Valid values are Any combination of: bfm age cfc</desc>
   </entry>
 
   <help>
