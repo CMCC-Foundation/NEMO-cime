@@ -250,12 +250,10 @@ def buildnml(case, caseroot, compname):
     if continue_run == True:
         rstart = ".true."
         rstctl = 2
-        msh = ".false." 
         tsdini = ".false."
     else:
         rstart = ".false."
         rstctl = 0
-        msh = ".true."
         tsdini = ".true."
 
     trcrstart = ".false."
@@ -345,7 +343,6 @@ def buildnml(case, caseroot, compname):
             ndastp3 = run_strdate[8:10]
             ndastp = int(ndastp1 + ndastp2 + ndastp3)
             rstctl = 0
-            lastkt = 0
 
 
     # DATE MANAGEMENT                  
@@ -556,7 +553,6 @@ def buildnml(case, caseroot, compname):
         newnml.write("/ \n")
         newnml.write("&namdom \n")
         newnml.write("    rn_Dt     = " + str(DTSEC) + "     !  time step for the dynamics \n")
-        newnml.write("    ln_meshmask = " + msh + "          !  create (T) a mesh file or not (F) \n")
         newnml.write("/ \n")
         newnml.write("&namcfg \n")
         newnml.write("    ln_closea =   .true.               ! control (T) of surface freshwater budget over closed seas or not (F) \n")
