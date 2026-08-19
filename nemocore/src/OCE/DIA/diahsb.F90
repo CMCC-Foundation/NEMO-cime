@@ -139,7 +139,7 @@ CONTAINS
       IF( ln_trabbc )   z_frc_trd_t = z_frc_trd_t + zbg(8) ! geothermal heat
 #if defined CCSMCOUPLED
       ! Add frazil ice formation heat flux
-      IF (lk_cesm)      z_frc_trd_t = z_frc_trd_t - r1_rho0_rcp * glob_sum( 'diahsb', QICE(:,:) * surf(:,:) )
+      IF (lk_cesm)      z_frc_trd_t = z_frc_trd_t - 0.5 * r1_rho0_rcp * glob_sum( 'dia_hsb', QICE(:,:) * surf(:,:) )
 #endif
       !
       frc_v = frc_v + z_frc_trd_v * rn_Dt
