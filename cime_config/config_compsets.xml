@@ -39,48 +39,71 @@
 
   <compset>
     <alias>C_NEMO</alias>
-    <lname>2000_DATM%NYF_SLND_DICE%SSMI_NEMO_DROF%NYF_SGLC_SWAV</lname>
+    <lname>2000_DATM%NYF_SLND_DICE%SSMI_NEMO%L75_DROF%NYF_SGLC_SWAV</lname>
   </compset>
 
   <compset>
     <alias>C_JRA_NEMO</alias>
-    <lname>2000_DATM%JRA_SLND_DICE%SSMI_NEMO_DROF%JRA_SGLC_SWAV</lname>
+    <lname>2000_DATM%JRA_SLND_DICE%SSMI_NEMO%L75_DROF%JRA_SGLC_SWAV</lname>
   </compset>
 
   <compset>
     <alias>C_IAF_NEMO</alias>
-    <lname>2000_DATM%IAF_SLND_DICE%IAF_NEMO_DROF%IAF_SGLC_SWAV</lname>
+    <lname>2000_DATM%IAF_SLND_DICE%IAF_NEMO%L75_DROF%IAF_SGLC_SWAV</lname>
   </compset>
 
   <!-- G compsets -->
 
   <compset>
     <alias>GIAF_NEMO</alias>
-    <lname>2000_DATM%IAF_SLND_CICE_NEMO_DROF%IAF_SGLC_SWAV</lname>
+    <lname>2000_DATM%IAF_SLND_CICE_NEMO%L75_DROF%IAF_SGLC_SWAV</lname>
   </compset>
 
   <compset>
     <alias>GIAF_JRA_NEMO</alias>
-    <lname>2000_DATM%JRA_SLND_CICE_NEMO_DROF%JRA_SGLC_SWAV</lname>
+    <lname>2000_DATM%JRA_SLND_CICE_NEMO%L75_DROF%JRA_SGLC_SWAV</lname>
   </compset>
 
   <!-- Data wave -->
 
   <compset>
     <alias>C_DWAV_NEMO</alias>
-    <lname>2000_DATM%NYF_SLND_DICE%SSMI_NEMO_DROF%NYF_SGLC_DWAV%CLIMO</lname>
+    <lname>2000_DATM%NYF_SLND_DICE%SSMI_NEMO%L75_DROF%NYF_SGLC_DWAV%CLIMO</lname>
   </compset>
   <compset>
     <alias>CIAF_DWAV_NEMO</alias>
-    <lname>2000_DATM%IAF_SLND_DICE%IAF_NEMO_DROF%IAF_SGLC_DWAV%CLIMO</lname>
+    <lname>2000_DATM%IAF_SLND_DICE%IAF_NEMO%L75_DROF%IAF_SGLC_DWAV%CLIMO</lname>
   </compset>
   <compset>
     <alias>G_DWAV_NEMO</alias>
-    <lname>2000_DATM%NYF_SLND_CICE_NEMO_DROF%NYF_SGLC_DWAV%CLIMO</lname>
+    <lname>2000_DATM%NYF_SLND_CICE_NEMO%L75_DROF%NYF_SGLC_DWAV%CLIMO</lname>
   </compset>
   <compset>
     <alias>GIAF_DWAV_NEMO</alias>
-    <lname>2000_DATM%IAF_SLND_CICE_NEMO_DROF%IAF_SGLC_DWAV%CLIMO</lname>
+    <lname>2000_DATM%IAF_SLND_CICE_NEMO%L75_DROF%IAF_SGLC_DWAV%CLIMO</lname>
   </compset>
+
+  <!-- ocean biogeochemistry -->
+
+  <compset>
+    <alias>C_NEMOBFM</alias>
+    <lname>2000_DATM%NYF_SLND_DICE%SSMI_NEMO%L75%BFM_DROF%NYF_SGLC_SWAV</lname>
+  </compset>
+
+  <compset>
+    <alias>GIAF_NEMOBFM</alias>
+    <lname>2000_DATM%IAF_SLND_CICE_NEMO%L75%BFM_DROF%IAF_SGLC_SWAV</lname>
+  </compset>
+
+  <compset>
+    <alias>C_NEMOBGC</alias>
+    <lname>2000_DATM%NYF_SLND_DICE%SSMI_NEMO%L75%OBGC_DROF%NYF_SGLC_SWAV</lname>
+  </compset>
+
+  <compset>
+    <alias>GIAF_NEMOBGC</alias>
+    <lname>2000_DATM%IAF_SLND_CICE_NEMO%L75%OBGC_DROF%IAF_SGLC_SWAV</lname>
+  </compset>
+
 
 </compsets>
