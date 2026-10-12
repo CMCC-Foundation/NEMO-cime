@@ -191,6 +191,9 @@ CONTAINS
       IF( iom_use( 'rhositu' ) ) THEN
          CALL iom_put( 'rhositu', (rhd+1._wp)*tmask*rho0 )
       END IF
+      IF( iom_use( 'rhosituan' ) ) THEN
+         CALL iom_put( 'rhosituan', rhd )
+      END IF
 #endif
       IF( iom_use( 'masstot' ) .OR. iom_use( 'temptot' )  .OR. iom_use( 'saltot' )  ) THEN
           !                                         ! Mean density anomalie, temperature and salinity

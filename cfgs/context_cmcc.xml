@@ -30,6 +30,7 @@
 
     <field id="mldr0_125"    long_name="Mixed Layer Depth dr=0.125 (ref.surf)"     unit="m"                        />
     <field id="rhositu"      long_name="in situ density"                unit="kg/m3" grid_ref="grid_T_3D"  />
+    <field id="rhosituan"    long_name="in situ density anomaly"        unit="-" grid_ref="grid_T_3D"  />
 
 </field_group>
 
