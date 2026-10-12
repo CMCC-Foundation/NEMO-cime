@@ -29,6 +29,7 @@ def _build_nemo():
         gmake_j = case.get_value("GMAKE_J")
         gmake = case.get_value("GMAKE")
         driver = case.get_value("COMP_INTERFACE")
+        ocn_grid = case.get_value("OCN_GRID")
 
         # set cpp option for nemo depending on ocean grid and passive tracer
         base_cpp = " -DCCSMCOUPLED -Dkey_diahth "
@@ -43,13 +44,10 @@ def _build_nemo():
         ocn_pstr_modules = " ".join(case.get_value("NEMO_TOP_MODULES").split())
         if ocn_pstr_modules:
             top_cpp = " -Dkey_top "
-            for module in ocn_pstr_modules.split(" "):
-                if module == "age":
-                    top_cpp = top_cpp + " -Dkey_age "
-                elif module == "cfc":
-                    top_cpp = top_cpp + " -Dkey_cfc "
-                else:
-                    expect(False, "module %s is not a valid value in NEMO_TOP_MODULES!" %module)
+
+        bfm_cpp = ""
+        if 'bfm' in ocn_pstr_modules or 'all' in ocn_pstr_modules:
+            bfm_cpp = "-DBFM_NEMO -DBFM_NOPOINTERS -DBFM_PARALLEL -DINCLUDE_PELCO2 -DINCLUDE_PELFE" 
     
         bfb_cpp = " "
         bfbflag = case.get_value("BFBFLAG")
@@ -61,7 +59,7 @@ def _build_nemo():
         if dbgflag:
             dbg_cpp = dbg_cpp + " -Dkey_nosignedzero "
 
-        nemo_cppdefs = base_cpp + ver_cpp + res_cpp + drv_cpp + top_cpp + bfb_cpp + dbg_cpp
+        nemo_cppdefs = base_cpp + ver_cpp + res_cpp + drv_cpp + top_cpp + bfm_cpp + bfb_cpp + dbg_cpp
 
         # create Filepath file
         filepath_file = os.path.join(bldroot, "Filepath")
@@ -77,16 +75,25 @@ def _build_nemo():
             else:
                 expect(False, "driver %s is not a valid value. " %driver)
 
-#TODO TRACERS: TO BE UPDATED AND TESTED 
-            ocn_pstr_modules = " ".join(case.get_value("NEMO_TOP_MODULES").split())
             if ocn_pstr_modules:
                 base_path = os.path.join(srcroot, "components", "nemo", "nemocore", "src", "TOP")
-                paths_top = [x[0] for x in os.walk(base_path)]
+                paths_add = [x[0] for x in os.walk(base_path)]
+                paths_nemo.extend(paths_add) 
+
+            if bfm_cpp != "":
+                base_path = os.path.join(srcroot, "components", "bfm", "src", "BFM")
+                exclude_path = [base_path + '/' + x for x in ['BenBio', 'Seaice']]
+                paths_add = [x[0] for x in os.walk(base_path) if x[0] not in exclude_path]
+                paths_add.extend([os.path.join(srcroot, "components", "bfm", "include"),
+                                  os.path.join(srcroot, "components", "bfm", "src", "share"),
+                                  os.path.join(srcroot, "components", "bfm", "esm", ocn_grid)])
+                paths_nemo.extend(paths_add)
+                # insert bfm-nemo coupling interface to nemo path just after src.nemo
+                base_path = os.path.join(srcroot, "components", "bfm", "src", "nemo")
+                paths_nemo.insert(1, base_path)
 
             with open(filepath_file, "w") as filepath:
                 filepath.write("\n".join(paths_nemo))
-                if ocn_pstr_modules:
-                    filepath.write("\n".join(paths_top))
                 filepath.write("\n")
 
         # build the library
