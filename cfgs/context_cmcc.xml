@@ -1,5 +1,19 @@
 <context id="nemo">
 
+<variable_definition>
+   <!-- Year/Month/Day of time origin for NetCDF files; defaults to 1800-01-01 -->
+   <variable id="ref_year"  type="int"> 1900 </variable>
+   <variable id="ref_month" type="int"> 01 </variable>
+   <variable id="ref_day"   type="int"> 01 </variable>
+   <variable id="rho0"      type="float" > 1026.0 </variable>
+   <variable id="cpocean"   type="float" > 3996.0 </variable>
+   <variable id="convSpsu"  type="float" > 0.99530670233846  </variable>
+   <variable id="rhoic"     type="float" > 917.0 </variable>
+   <variable id="rhosn"     type="float" > 330.0 </variable>
+   <variable id="missval"   type="float" > 1.e20 </variable>
+   <variable id="mwC"      type="float" > 12.0  </variable>
+</variable_definition>
+
 <!-- CMCC additonal fields for NEMO physics -->
 
 <field_definition level="1" prec="4" operation="average" enabled=".TRUE." default_value="1.e20" > <!-- time step automaticaly defined -->
