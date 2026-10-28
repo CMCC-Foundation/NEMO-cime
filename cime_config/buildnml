@@ -49,6 +49,7 @@ def buildnml(case, caseroot, compname):
     stop_n       = case.get_value("STOP_N")
     casenm       = case.get_value("CASE")
     comp_atm     = case.get_value("COMP_ATM")
+    data_prod    = case.get_value("DATA_PROD")
 
     # Set source NEMO configuration, tools & data directories
     source_dir = os.path.join(srcroot, "components", compname)
@@ -76,9 +77,8 @@ def buildnml(case, caseroot, compname):
         shutil.copy(orig_cfg, nml_cfg)
 
     # Copy of NEMO tracer namelists if active TOP modules
-    NEMO_TOP_AGE = 0 
-    NEMO_TOP_CFC = 0
     ocn_pstr_modules = " ".join(nemo_top_mod.split())
+    use_bfm = False ; use_top_trc = False
     if ocn_pstr_modules:
         if not os.path.exists(os.path.join(confdir, "namelist_top_ref")):
             _copy_file('namelist_top_ref', cfg_shared, confdir)
@@ -87,26 +87,21 @@ def buildnml(case, caseroot, compname):
             orig_cfg = os.path.join(cfg_grid, "namelist_top_cfg." + ocn_grid)
             shutil.copy(orig_cfg, top_cfg)
         for module in ocn_pstr_modules.split(" "):
-            if module == "age":
-                NEMO_TOP_AGE = 1
-                age_cfg = os.path.join(confdir, "namelist_age_cfg")
-                age_ref = os.path.join(confdir, "namelist_age_ref")
-                if not os.path.exists(age_cfg):
-                    _copy_file('namelist_age_cfg', cfg_shared, confdir)
-                if not os.path.exists(age_ref):
-                    _copy_file('namelist_age_ref', cfg_shared, confdir)
-            if module == "cfc":
-                NEMO_TOP_CFC = 1
-                cfc_cfg = os.path.join(confdir, "namelist_cfc_cfg")
-                cfc_ref = os.path.join(confdir, "namelist_cfc_ref")
-                if not os.path.exists(cfc_cfg):
-                    _copy_file('namelist_cfc_cfg', cfg_shared, confdir)
-                if not os.path.exists(cfc_ref):
-                    _copy_file('namelist_cfc_ref', cfg_shared, confdir)
+            if module in ["trc", "obgc"]:
+                use_top_trc = True
+                trc_cfg = os.path.join(confdir, "namelist_trc_cfg")
+                trc_ref = os.path.join(confdir, "namelist_trc_ref")
+                if not os.path.exists(top_cfg):
+                    _copy_file('namelist_trc_cfg', cfg_shared, confdir)
+                if not os.path.exists(top_ref):
+                    _copy_file('namelist_trc_ref', cfg_shared, confdir)
+            if module in ["bfm", "obgc"]:
+                use_bfm = True
+                #cfg_bfm =  os.path.join(srcroot, "components", "bfm", "esm", ocn_grid)
             else:
                 expect(False, "module %s is not a valid value in NEMO_TOP_MODULES!" %module)
 
-    # Copy of configuration files required for the I/O through IOM/XIOS
+    # Populate case configuration with files required for the I/O through IOM/XIOS
     iodef_nml = os.path.join(confdir, "iodef.xml")
     if not os.path.exists(iodef_nml):
         # First copy file from the SHARED folder
@@ -118,22 +113,51 @@ def buildnml(case, caseroot, compname):
         for filename in xml_files:
             orig_xml = filename.replace('.'+ocn_grid, '')
             shutil.copy(os.path.join(cfg_grid, filename), os.path.join(confdir, orig_xml))  
- 
-    # Copy of NEMO namelists and XMLs into rundir directory
-    filenames = glob.glob(os.path.join(confdir, 'namelist*'))
-    for filename in filenames:
-            shutil.copy(filename, rundir)
-    filenames = glob.glob(os.path.join(confdir, '*.xml'))
-    for filename in filenames:
-            shutil.copy(filename, rundir)
-    
-    if NEMO_TOP_CFC == 0:
-        iodef_run = os.path.join(rundir, "iodef.xml")
-        subprocess.call(['sed','-i','/def_top.xml/d',iodef_run]) 
+        if use_top_trc:
+            xml_files = ['field_def_nemo-innerttrc.xml',]
+            for filename in xml_files:
+                shutil.copy(os.path.join(cfg_shared, filename), confdir)
 
-    # Copy of NEMO postrun script
-    if not os.path.exists(os.path.join(confdir, "postrun_tpl")):
-        _copy_file('postrun_tpl', src_utils, confdir)
+    # BFM namelists
+    if use_bfm:
+        confdir_bfm  = os.path.join(caseroot, "Buildconf", "bfmconf")
+        if not os.path.isdir(confdir_bfm):
+            os.makedirs(confdir_bfm)
+        cfg_bfm =  os.path.join(srcroot, "components", "bfm", "esm", ocn_grid)
+        filenames = sorted(glob.glob(os.path.join(cfg_bfm, '*.nml')))
+        filenames.extend(sorted(glob.glob(os.path.join(cfg_bfm, '*.xml'))))
+        # Copy to configuration directory
+        if not os.path.exists(os.path.join(confdir_bfm, os.path.basename(filenames[0]))):
+            for filename in filenames:
+                shutil.copy(os.path.join(cfg_bfm, filename), confdir_bfm)
+        # Copy namelist_top_cfg from bfm configuration to case nemoconf dir
+        filename = 'namelist_top_cfg'
+        shutil.copy(os.path.join(cfg_bfm, filename), os.path.join(confdir, filename))
+        # add bfm user list
+        filename = 'user_nl_bfm'
+        if not os.path.exists(os.path.join(caseroot, filename)):
+            shutil.copy(os.path.join(srcroot, "components", "bfm", "esm", filename), caseroot)
+
+ 
+    # Copy all namelists and XMLs into rundir directory
+    filenames = sorted(glob.glob(os.path.join(confdir, 'namelist*')))
+    filenames.extend(sorted(glob.glob(os.path.join(confdir, '*.xml'))))
+    for filename in filenames:
+            shutil.copy(filename, rundir)
+    if use_bfm:
+        filenames = sorted(glob.glob(os.path.join(confdir_bfm, '*.nml')))
+        filenames.extend(sorted(glob.glob(os.path.join(confdir_bfm, '*.xml'))))
+        for filename in filenames:
+            shutil.copy(os.path.join(confdir_bfm, filename), rundir)
+           
+    # XML fixes
+    if not use_top_trc:
+        filename = os.path.join(rundir, "context_nemo.xml")
+        subprocess.call(['sed','-i','/def_nemo-innerttrc.xml/d', filename]) 
+    if not use_bfm:
+        filename = os.path.join(rundir, "context_nemo.xml")
+        subprocess.call(['sed','-i','/def_bfm.xml/d', filename])
+
 
     # Define initial and boundary conditions files
     if ocn_grid in ["tn1v3", "tn1v4"]: # ORCA1
@@ -143,16 +167,9 @@ def buildnml(case, caseroot, compname):
             expect(False, f'Unsupported combination of horizontal ("{ocn_grid}") and vertical ("{nemo_vgrid}") grids!')
         DOMAIN        = f"grid/ORCA1{nemo_vgrid}_domain_cfg.nc"
         SUBBASINS     = f"grid/ORCA1_subbasins_nohalo.nc"
-        #MASK_ITF      = f"grid/ORCA1_maskITF_v1.0.nc"     # Indonesian Through Flow (???)
          #
         GEOTHERMAL    = f"forcing/ORCA1_Goutorbe2011_heatflow_nomask.nc"
-        #K1ROWDRG      = f"forcing/ORCA1_K1_v1.0_nohalo.nc"    # Needed by NEMO 4.2+ ?
-        #M2ROWDRG      = f"forcing/ORCA1_M2_v1.0_nohalo.nc"    # Needed by NEMO 4.2+ ?
         CHLOROPHYLL   = f"forcing/ORCA1_ESACCIv4_chl_nomask.nc"
-        #AHMCOEF       = f"forcing/ORCA1_ahmcoef_v1.0.nc"
-        #COORDINATES_XIOS = f"grid/ORCA1_coordinates_xios.nc"
-        #DISTCOAST     = f"no_distcoast_file.nc"
-        #SSSR          = f"no_sssr_file.nc"
       # WOA IC
         if nemo_vgrid == 'L50':
             TEMPERATURE   = f"ic/ORCA1L50_woa18_thetao_nomask.nc"
@@ -175,7 +192,7 @@ def buildnml(case, caseroot, compname):
         expect(False, "grid %s is not a valid value in OCN_GRID!" %ocn_grid)
 
     CFC = ""
-    if NEMO_TOP_CFC == 1:
+    if use_top_trc:
         CFC = "../resolution_independent/forcing/CFCs_CDIAC.nc"
 
     # check for existence of (or create symlinks for) the IC/BC/grid files
@@ -238,7 +255,54 @@ def buildnml(case, caseroot, compname):
         elif not os.path.exists(data_bc_gth):
             os.symlink(data_bc_gts, data_bc_gth)
 
+    # BFM initial conditons and forcings
+    if use_bfm:
+        bfm_ic_root = os.path.join(nemo_in, 'ic/bfm')
+        bfm_bc_root = os.path.join(nemo_in, 'forcing/bfm')
+        bfm_data = {}
+        if ocn_grid in ["tn1v4"]: # ORCA1
+            bfm_data['DOX_1m_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_woa23_DOX_nomask.nc')
+            bfm_data['NO3_1m_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_woa23_NO3_nomask.nc')
+            bfm_data['PO4_1m_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_woa23_PO4_nomask.nc')
+            bfm_data['SIL_1m_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_woa23_SIL_nomask.nc')
+            bfm_data['DFE_1m_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_smooth_DFE_nomask.nc')
+            bfm_data['DIC_1y_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_glodap2.2016b_DIC_nomask.nc')
+            bfm_data['ALK_1y_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_glodap2.2016b_ALK_nomask.nc')
+            bfm_data['OBGC_RIVERS']     = os.path.join(bfm_bc_root, 'tn1v4_gnews2_river_c20261014.nc')
+            bfm_data['IRON_DEPOSITION'] = os.path.join(bfm_bc_root, 'tn1v4_cam_aerosoldep_2000_c20261014.nc')
+            bfm_data['N_DEPOSITION']    = os.path.join(bfm_bc_root, 'tn1v4_ndep_hist_y2000.nc')
+            bfm_data['bottom_fraction'] = os.path.join(bfm_bc_root, 'ORCA1L75_bottom_fraction.nc')
+            if comp_atm == "datm":
+                ggas_file = "ghg_global_CMIP_CR-CMIP-1-0-0_1750-2022_c20260923.nc"
+                bfm_data[ggas_file[:-3]] = os.path.join(din_loc_root, "cmip7", "cam", "ggas", ggas_file)
+            ndep_name = None
+    # need to add special cases for nitrogen deposition
+    #if ( "${NEMO_USE_CASE}" == "1850_CLIM" ) then
+    #   set NDEP      = "ndep_clim_1850"
+    #   set DICARBON  = "PI_DIC_GLODAPv2.2016b-ORCA1L50_annual" ----> DIC_1y_nomask
+    #   sed -i "s/'DIC'/'PI_DIC'/g" ${RUNDIR}/namelist_top_cfg
+    #else if ( "${NEMO_USE_CASE}" == "2000_CLIM" ) then
+    #   set NDEP      = "ndep_clim_2000"
+    #else if ( "${NEMO_USE_CASE}" == "20C_TRANS" || "${NEMO_USE_CASE}" == "OMIP" ) then
+    #   set NDEPDIR   = "ndep_hist"
+    #   set DICARBON  = "PI_DIC_GLODAPv2.2016b-ORCA1L50_annual"
+    #   sed -i "s/'DIC'/'PI_DIC'/g" ${RUNDIR}/namelist_top_cfg
+    #else if ( "${NEMO_USE_CASE}" =~ "ssp*" ) then
+    #   set NDEPDIR   = "ndep_${NEMO_USE_CASE}"
+    #else
+                
+        else:
+            expect(False, "bfm input grid %s is not a valid value in OCN_GRID!" %ocn_grid)
 
+        for field in bfm_data.keys():
+            run_file = os.path.join(rundir,field + '.nc')
+            src_file = bfm_data[field]
+            if not os.path.exists(src_file):
+                raise RuntimeError("File not found: \n{:s}".format(src_file))
+            elif not os.path.exists(run_file):
+                os.symlink(src_file, run_file)
+            
+    # Handle RESTART 
     # set value for timestep and last date
     lastkt = 0
     ndastp1 = run_strdate[0:4]
@@ -251,10 +315,12 @@ def buildnml(case, caseroot, compname):
         rstart = ".true."
         rstctl = 2
         tsdini = ".false."
+        bfmini = True
     else:
         rstart = ".false."
         rstctl = 0
         tsdini = ".true."
+        bfmini = False
 
     trcrstart = ".false."
     
@@ -295,7 +361,7 @@ def buildnml(case, caseroot, compname):
             expect(False, "ERROR: CONTINUE_RUN is %s and RUN_TYPE is %s, but no %s file found in %s"  %(continue_run, run_type, ocerstinp, rundir))
     
         # Looks for restart files for TOP  and set the variable for the namelist substitution
-        if NEMO_TOP_AGE == 1 or NEMO_TOP_CFC == 1:
+        if use_top_trc or use_bfm:
             flist = glob.glob(os.path.join(rundir, EXPID + "_*_" + trcrstinp + "_*.nc"))
             if len(flist) > 1:
                 rstflst = flist[0]
@@ -529,7 +595,7 @@ def buildnml(case, caseroot, compname):
     elif comp_atm == "cam":
         nnfwb = 0
 
-    # 6. NEMO run-time namelist settings
+    # 6. Model run-time namelist settings
 
     merge_nml = os.path.join(toolsdir, "merge_namelist.pl")
     if not os.path.exists(merge_nml):
@@ -579,6 +645,11 @@ def buildnml(case, caseroot, compname):
         newnml.write("    nn_evdm  = 1             !  evd apply on tracer (=0) or on tracer and momentum (=1) \n")
         newnml.write("    rn_evd   = 10.0          !  evd mixing coefficient [m2/s] \n")
         newnml.write("/ \n")
+        if use_bfm:
+            newnml.write("&namtra_qsr \n")
+            newnml.write("   ln_qsr_rgb  = .false. !  RGB light penetration (Red-Green-Blue) \n")
+            newnml.write("   ln_qsr_bio  = .true.  !  bio-model light penetration \n")
+            newnml.write("/ \n")
 
 
     nml_cfg_run = os.path.join(rundir, "namelist_cfg")
@@ -599,30 +670,38 @@ def buildnml(case, caseroot, compname):
 
     # 6.2. TOP run-time namelist settings
 
-    ocn_pstr_modules = " ".join(nemo_top_mod.split())
-    if ocn_pstr_modules:
+    if use_top_trc or use_bfm:
         nml_top_new = os.path.join(rundir, "namelist_top_cfg.new")
         with open(nml_top_new, "w") as newnmlT:
             newnmlT.write("&namtrc_run \n")
-            newnmlT.write("    nn_dttrc    = 1                   !  time step frequency for passive tracers coupling \n")
-            newnmlT.write("    nn_writetrc = " + str(ts_per_day) + "       !  time step frequency for tracer outputs \n")
             newnmlT.write("    ln_top_euler = .true.             !  use Euler time-stepping for TOP \n")
             newnmlT.write("    ln_rsttr = " + trcrstart + "           !  start from a restart file (T) or not (F) \n")
             newnmlT.write("    nn_rsttr = " + str(rstctl) + "              !  restart control = 0 initial time step is not compared to the restart \n")
             newnmlT.write("    cn_trcrst_in  = " + trcrstinp + "    !  suffix of pass. tracer restart name (input) \n")
             newnmlT.write("    cn_trcrst_out = \"restart_trc\"     !  suffix of pass. tracer restart name (output) \n")
             newnmlT.write("/ \n")
+            newnmlT.write("&namtrc \n")
+            if use_top_trc:
+                newnmlT.write("    ln_age        =  .true.     !  Run the sea water age tracer \n")
+                newnmlT.write("    ln_cfc12      =  .true.     !  Run the CFC12 passive tracer \n")
+                newnmlT.write("    ln_sf6        =  .true.     !  Run the SF6 passive tracer   \n")
+            if use_bfm:
+                newnmlT.write("    ln_my_trc     =  .true.     !  Run MY_TRC BGC model \n")
+                # ln_trcbc and ln_trcdta handled in BFM according to BFM_General setting
+            newnmlT.write("/ \n")
             newnmlT.write("&namtrc_adv \n")
-            newnmlT.write("    ln_trcadv_tvd     =  .false.      !  TVD scheme \n")
-            newnmlT.write("    ln_trcadv_muscl   =  .true.       !  MUSCL scheme \n")
+            newnmlT.write("    ln_trcadv_mus   =  .true.       !  MUSCL scheme \n")
             newnmlT.write("/ \n")
             newnmlT.write("&namtrc_rad \n")
             newnmlT.write("    ln_trcrad   =  .true.             !  artificially correct negative concentrations (T) or not (F) \n")
             newnmlT.write("/ \n")
-            newnmlT.write("&namtrc_dia \n")
-            newnmlT.write("    ln_diatrc     =  .false.          !  save additional diag. (T) or not (F) \n")
-            newnmlT.write("    nn_writedia   =  " + str(ts_per_day) + "    !  output time step frequency for diagnostics \n")
-            newnmlT.write("/ \n")
+             # Time-varying Nitrogen Deposition ( NOx & NHy)
+            if use_bfm and ndep_name is not None:
+                newnmlT.write("&namtrc_bc \n")
+                newnmlT.write(f"    sn_trcsbc(3)   = {ndep_name}/ndep_name -1   'NOy'       .false.  .false.  'yearly' '' '' '' \n")
+                newnmlT.write(f"    sn_trcsbc(4)   = {ndep_name}/ndep_name -1   'NHx'       .false.  .false.  'yearly' '' '' '' \n")
+                newnmlT.write("/ \n")
+
 
         nml_top_tmp = os.path.join(rundir, "namelist_top_cfg.tmp")
         nml_top_run = os.path.join(rundir, "namelist_top_cfg")
@@ -632,16 +711,80 @@ def buildnml(case, caseroot, compname):
         expect(rc == 0, "Command %s failed rc=%d\nout=%s\nerr=%s" % (cmd, rc, out, err))
         os.remove(nml_top_new)
 
-        cmd = "%s %s %s %s" %(merge_nml, top_cfg_tmp, nml_cfg_user, nml_top_run)
+        cmd = "%s %s %s %s" %(merge_nml, nml_top_tmp, nml_cfg_user, nml_top_run)
         rc, out, err = run_cmd(cmd)
         expect(rc == 0, "Command %s failed rc=%d\nout=%s\nerr=%s" % (cmd, rc, out, err))
-        os.remove(top_cfg_tmp)
+        os.remove(nml_top_tmp)
+
+    # 6.3. BFM run-time namelist settings
+    if use_bfm:
+        nml_user = os.path.join(caseroot, "user_nl_bfm")
+        #
+        nml_new = os.path.join(rundir, "dummy_nml.new")
+        nml_tmp = os.path.join(rundir, "dummy_nml.tmp")
+        #
+        this_nml = 'BFM_General.nml'
+        nml_cfg = os.path.join(confdir_bfm, this_nml)
+        nml_run = os.path.join(rundir, this_nml)
+        with open(nml_new, "w") as newnmlT:
+            newnmlT.write("&bfm_nml \n")
+            newnmlT.write("  bio_calc = .true.     \n")
+            if bfmini: 
+                newnmlT.write("  bfm_init = 1     \n")
+            else:
+                newnmlT.write("  bfm_init = 0     \n")
+            newnmlT.write("  parallel_log = .true.     \n")
+            newnmlT.write("/ \n")
+
+        merge_namelists(merge_nml, nml_cfg, nml_new, nml_tmp, nml_user, nml_run)
+        
+        #
+        this_nml = 'Carbonate_Dynamics.nml'
+        nml_cfg = os.path.join(confdir_bfm, this_nml)
+        nml_run = os.path.join(rundir, this_nml)
+        env_run_co2 = case.get_value("CCSM_CO2_PPMV")
+        with open(nml_new, "w") as newnmlT:
+            newnmlT.write("&CSYS_parameters \n")
+            newnmlT.write(f"  AtmCO20  = {env_run_co2} \n")
+            # Atmospheric sea level pressure always coupled
+            newnmlT.write(f"  AtmSLP_N = 3      'dummy.nc'    .TRUE.  'Dummy'   '1850-07-01 00:00'     'dummy'   .TRUE. \n")
+            # Atmospheric co2 
+            if comp_atm == "cam":
+                newnmlT.write(f"  AtmCO2_N = 3     'dummy.nc'    .TRUE.  'Dummy'   '1850-01-01 00:00:00'  'yearly'  .TRUE. \n") 
+            elif comp_atm == "datm":
+                newnmlT.write(f"  AtmCO2_N = 1     '{ggas_file}'  .TRUE.  'CO2'   '1850-07-01 00:00:00'  'yearly'  .TRUE. \n")
+
+            # coupler co2 flux
+            if case.get_value("CCSM_BGC") == "CO2C":
+               newnmlT.write("  co2_flux_to_atm = .true. \n")
+            else:
+               newnmlT.write("  co2_flux_to_atm = .false. \n")
+            newnmlT.write("/ \n")
+
+        merge_namelists(merge_nml, nml_cfg, nml_new, nml_tmp, nml_user, nml_run)
 
 
 ###############################################################################
 
+def merge_namelists(merge_nml, nml_cfg, nml_new, nml_tmp, nml_user, nml_run):
+    """ Merges configuration namelist files in a two-step process """
+
+    # Step 1: Merge case configuration with buildnml settings
+    cmd = "%s %s %s %s" % (merge_nml, nml_cfg, nml_new, nml_tmp)
+    rc, out, err = run_cmd(cmd)
+    expect(rc == 0, "Command %s failed rc=%d\nout=%s\nerr=%s" % (cmd, rc, out, err))
+    os.remove(nml_new)
+
+    # Step 2: Overlay user configuration onto the merged temporary file
+    cmd = "%s %s %s %s" % (merge_nml, nml_tmp, nml_user, nml_run)
+    rc, out, err = run_cmd(cmd)
+    expect(rc == 0, "Command %s failed rc=%d\nout=%s\nerr=%s" % (cmd, rc, out, err))
+    os.remove(nml_tmp)
+
+
 def _isactive(s):
     return s!=None and s.strip()!=''
+
 
 def _copy_file(filename, src_dir, dest_dir):
     """ Copy a given file from a source directory to a destination directory
