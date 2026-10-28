@@ -47,7 +47,7 @@ def _build_nemo():
 
         bfm_cpp = ""
         if 'bfm' in ocn_pstr_modules or 'all' in ocn_pstr_modules:
-            bfm_cpp = "-DBFM_NEMO -DBFM_NOPOINTERS -DBFM_PARALLEL -DINCLUDE_PELCO2 -DINCLUDE_PELFE" 
+            bfm_cpp = "-DBFM_NEMO -DBFM_NOPOINTERS -DBFM_PARALLEL -DINCLUDE_PELCO2 -DINCLUDE_PELFE -Dkey_cpl_carbon_cycle"
     
         bfb_cpp = " "
         bfbflag = case.get_value("BFBFLAG")
