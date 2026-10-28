@@ -87,6 +87,12 @@ CONTAINS
 
 #if defined key_cpl_carbon_cycle
       ALLOCATE( co2_x2o(jpi,jpj), STAT=ierr(2) )
+      !IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: use cpl_carbon_cycle'
+      !IF ( co2_flux_to_atm ) then
+      !    IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: atmosphere co2 cycle is prognostic'
+      !ELSE
+      !    IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: atmosphere co2 cycle is diagnostic'
+      !ENDIF
 #endif
       !
       istat = MAXVAL( ierr )
