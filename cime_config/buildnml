@@ -268,8 +268,8 @@ def buildnml(case, caseroot, compname):
             bfm_data['DFE_1m_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_smooth_DFE_nomask.nc')
             bfm_data['DIC_1y_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_glodap2.2016b_DIC_nomask.nc')
             bfm_data['ALK_1y_nomask']   = os.path.join(bfm_ic_root, 'ORCA1L75_glodap2.2016b_ALK_nomask.nc')
-            bfm_data['OBGC_RIVERS']     = os.path.join(bfm_bc_root, 'tn1v4_gnews2_river_c20261014.nc')
-            bfm_data['IRON_DEPOSITION'] = os.path.join(bfm_bc_root, 'tn1v4_cam_aerosoldep_2000_c20261014.nc')
+            bfm_data['OBGC_RIVER_LOAD'] = os.path.join(bfm_bc_root, 'tn1v4_gnews2_river_c20261014.nc')
+            bfm_data['DUST_DEPOSITION'] = os.path.join(bfm_bc_root, 'tn1v4_cam_aerosoldep_2000_c20261014.nc')
             bfm_data['N_DEPOSITION']    = os.path.join(bfm_bc_root, 'tn1v4_ndep_hist_y2000.nc')
             bfm_data['bottom_fraction'] = os.path.join(bfm_bc_root, 'ORCA1L75_bottom_fraction.nc')
             if comp_atm == "datm":
