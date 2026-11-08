@@ -29,6 +29,9 @@
   <axis id="deptht700" axis_ref="deptht" >
     <zoom_axis begin="0" n="42" />
   </axis>
+  <axis id="deptht1000" axis_ref="deptht" >
+    <zoom_axis begin="0" n="46" />
+  </axis>
   <axis id="deptht2000" axis_ref="deptht" >
     <zoom_axis begin="0" n="53" />
   </axis>

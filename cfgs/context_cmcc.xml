@@ -38,6 +38,10 @@
     <field id="toce_e3t_vsum700"  field_ref="toce_e3t_700"      unit="degress_C*m"  grid_ref="grid_T_vsum700"  detect_missing_value="true" />
     <field id="toce_vmean700"     field_ref="toce_e3t_vsum700"  unit="degree_C"     grid_ref="grid_T_vsum700"  detect_missing_value="true" > toce_e3t_vsum700/e3t_vsum700 </field>
 
+    <field id="e3t_1000"      field_ref="e3t"                       grid_ref="grid_T_zoom_1000"  detect_missing_value="true" />
+    <field id="soce_e3t_1000"  field_ref="soce_e3t"  unit="1e-3"     grid_ref="grid_T_zoom_1000"  detect_missing_value="true" />
+    <field id="toce_e3t_1000"  field_ref="toce_e3t"  unit="degree_C" grid_ref="grid_T_zoom_1000"  detect_missing_value="true" />
+
     <field id="14d"          long_name="Depth of 14C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   />
     <field id="17d"          long_name="Depth of 17C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   />
     <field id="hc40"         long_name="Heat content 0-40m"                             standard_name="integral_of_sea_water_potential_temperature_wrt_depth_expressed_as_heat_content"   unit="J/m2"  />
@@ -142,6 +146,11 @@
   <grid id="grid_T_zoom_700">
     <domain domain_ref="grid_T" />
     <axis axis_ref="deptht700" />
+  </grid>
+
+  <grid id="grid_T_zoom_1000">
+    <domain domain_ref="grid_T" />
+    <axis axis_ref="deptht1000" />
   </grid>
 
   <grid id="grid_T_zoom_2000">
