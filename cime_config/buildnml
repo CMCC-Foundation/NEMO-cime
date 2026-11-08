@@ -315,15 +315,15 @@ def buildnml(case, caseroot, compname):
         rstart = ".true."
         rstctl = 2
         tsdini = ".false."
+        trcrstart = ".true."
         bfmini = True
     else:
         rstart = ".false."
         rstctl = 0
         tsdini = ".true."
+        trcrstart = ".false."
         bfmini = False
 
-    trcrstart = ".false."
-    
     # obtain correct restart files
     ocerstinp = "restart"
     trcrstinp = "restart_trc"
@@ -333,7 +333,7 @@ def buildnml(case, caseroot, compname):
         else:
             EXPID = casenm
 
-        # Looks for restart files and set the variable for the namelist substitution
+        # Looks for ocean restart files and set the variable for the namelist substitution
         flist = glob.glob(os.path.join(rundir, EXPID + "_*_" + ocerstinp + "*.nc"))
         if len(flist) > 1:
             rstflst = flist[0]
@@ -369,16 +369,16 @@ def buildnml(case, caseroot, compname):
                 rstname = rstfspl[-1]
                 rstpart = rstname[len(EXPID)+1:]
                 rstspl = rstpart.split("_")
-                ocerstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]
-                rest_file = ocerstinp+"_0000.nc"
+                trcrstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]+"_"+rstspl[2]
+                trcrest_file = trcrstinp + "_0000.nc"
             elif len(flist) == 1:
                 rstflst = flist[0]
                 rstfspl = rstflst.split("/")
                 rstname = rstfspl[-1]
                 rstpart = rstname[len(EXPID)+1:]
                 rstspl = rstpart.split("_")
-                ocerstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]
-                rest_file = ocerstinp
+                trcrstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]+"_"+rstspl[2]
+                trcrest_file = trcrstinp
             elif len(flist) == 0 and continue_run == True:
                 expect(False, "ERROR: CONTINUE_RUN is %s, RUN_TYPE is %s, and NEMO_TOP_MODULES = %s, but no %s file found in %s"  %(continue_run, run_type, nemo_top_mod, trcrstinp, rundir))
             elif len(flist) == 0 and run_type == "hybrid":
