@@ -255,6 +255,10 @@ CONTAINS
 !         IF (lwp) WRITE(numout,*) ' RNF REDIST ',zrnfex
       END IF
 
+      ! water flux for passive tracers [Kg/m2/s]
+      ! need to change sing here as in TOP/TRP/trcsbc.F90:134 it is applied with a negative sign
+      fmmflx(:,:) = - meltw_x2o(:,:)
+
       ! 3. Salt Flux from cpl  [(Kg*psu)/(m^2 s)]
       sfx(:,:) = salt_x2o(:,:)
 
