@@ -334,59 +334,43 @@ def buildnml(case, caseroot, compname):
             EXPID = casenm
 
         # Looks for ocean restart files and set the variable for the namelist substitution
-        flist = glob.glob(os.path.join(rundir, EXPID + "_*_" + ocerstinp + "*.nc"))
-        if len(flist) > 1:
-            rstflst = flist[0]
-            rstfspl = rstflst.split("/")
-            rstname = rstfspl[-1]
-            rstpart = rstname[len(EXPID)+1:]
-            rstspl = rstpart.split("_")
-            ocerstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]
-            rest_file = ocerstinp+"_0000.nc"
-        elif len(flist) == 1:
-            rstflst = flist[0]
-            rstfspl = rstflst.split("/")
-            rstname = rstfspl[-1]
-            rstpart = rstname[len(EXPID)+1:]
-            rstspl = rstpart.split("_")
-            ocerstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]
-            rest_file = ocerstinp
-        elif len(flist) == 0 and continue_run == True:
-            expect(False, "ERROR: CONTINUE_RUN is %s and RUN_TYPE is %s, but no %s file found in %s"  %(continue_run, run_type, ocerstinp, rundir))
-        elif len(flist) == 0 and run_type == "hybrid":
-            logger.info("WARNING: RUN_TYPE=%s, CONTINUE_RUN=%s AND NO %s FILE FOUND in %s" %(run_type, continue_run, ocerstinp, rundir))
-            logger.info("******  Assume NEMO starts from initial conditions  ******")
-            hyb_rest = 0
+        flist = sorted(glob.glob(os.path.join(rundir, EXPID + "_*_" + ocerstinp + "*.nc")))
+        if not flist:
+            if continue_run:
+                expect(False, "ERROR: CONTINUE_RUN is %s and RUN_TYPE is %s, but no %s file found in %s"  %(continue_run, run_type, ocerstinp, rundir))
+            elif run_type == "hybrid":
+                logger.info("WARNING: RUN_TYPE=%s, CONTINUE_RUN=%s AND NO %s FILE FOUND in %s" %(run_type, continue_run, ocerstinp, rundir))
+                logger.info("******  Assume NEMO starts from initial conditions  ******")
+                hyb_rest = 0
+            else:
+                expect(False, "ERROR: CONTINUE_RUN is %s and RUN_TYPE is %s, but no %s file found in %s"  %(continue_run, run_type, ocerstinp, rundir))
         else:
-            expect(False, "ERROR: CONTINUE_RUN is %s and RUN_TYPE is %s, but no %s file found in %s"  %(continue_run, run_type, ocerstinp, rundir))
-    
+            rest_file = os.path.basename(flist[0])
+            if rest_file.endswith(f"{ocerstinp}_0000.nc"):
+                ocerstinp = rest_file.replace("_0000.nc", "")
+            elif rest_file.endswith(f"{ocerstinp}.nc"):
+                ocerstinp = rest_file.replace(".nc", "")
+
         # Looks for restart files for TOP  and set the variable for the namelist substitution
         if use_top_trc or use_bfm:
-            flist = glob.glob(os.path.join(rundir, EXPID + "_*_" + trcrstinp + "_*.nc"))
-            if len(flist) > 1:
-                rstflst = flist[0]
-                rstfspl = rstflst.split("/")
-                rstname = rstfspl[-1]
-                rstpart = rstname[len(EXPID)+1:]
-                rstspl = rstpart.split("_")
-                trcrstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]+"_"+rstspl[2]
-                trcrest_file = trcrstinp + "_0000.nc"
-            elif len(flist) == 1:
-                rstflst = flist[0]
-                rstfspl = rstflst.split("/")
-                rstname = rstfspl[-1]
-                rstpart = rstname[len(EXPID)+1:]
-                rstspl = rstpart.split("_")
-                trcrstinp = EXPID+"_"+rstspl[0]+"_"+rstspl[1]+"_"+rstspl[2]
-                trcrest_file = trcrstinp
-            elif len(flist) == 0 and continue_run == True:
-                expect(False, "ERROR: CONTINUE_RUN is %s, RUN_TYPE is %s, and NEMO_TOP_MODULES = %s, but no %s file found in %s"  %(continue_run, run_type, nemo_top_mod, trcrstinp, rundir))
-            elif len(flist) == 0 and run_type == "hybrid":
-                logger.info("WARNING: RUN_TYPE=%s, CONTINUE_RUN=%s AND NO %s FILE FOUND in %s" %(run_type, continue_run, trcrstinp, rundir))
-                logger.info("******  Assume TOP starts from initial conditions  ******")
+            flist = sorted(glob.glob(os.path.join(rundir, EXPID + "_*_" + trcrstinp + "*.nc")))
+            if not flist:
+                if continue_run:
+                    expect(False, "ERROR: CONTINUE_RUN is %s, RUN_TYPE is %s, and NEMO_TOP_MODULES = %s, but no %s file found in %s"  %(continue_run, run_type, nemo_top_mod, trcrstinp, rundir))
+                elif run_type == "hybrid":
+                    logger.info("WARNING: RUN_TYPE=%s, CONTINUE_RUN=%s AND NO %s FILE FOUND in %s" %(run_type, continue_run, trcrstinp, rundir))
+                    logger.info("******  Assume TOP starts from initial conditions  ******")
+                else:
+                    expect(False, "ERROR: CONTINUE_RUN is %s, RUN_TYPE is %s, and NEMO_TOP_MODULES = %s, but no %s file found in %s"  %(continue_run, run_type, nemo_top_mod, trcrstinp, rundir))
             else:
-                expect(False, "ERROR: CONTINUE_RUN is %s, RUN_TYPE is %s, and NEMO_TOP_MODULES = %s, but no %s file found in %s"  %(continue_run, run_type, nemo_top_mod, trcrstinp, rundir))
+                trcrest_file = os.path.basename(flist[0])
+                if trcrest_file.endswith(f"{trcrstinp}_0000.nc"):
+                    trcrstinp = trcrest_file.replace("_0000.nc", "")
+                elif trcrest_file.endswith(f"{trcrstinp}.nc"):
+                    trcrstinp = trcrest_file.replace(".nc", "")
 
+
+        # use oce restart to get time info and set here special restart cases
         if len(flist)>0: 
             rd_rest = os.path.join(rundir, rest_file)
             Rlastkt = os.popen('ncdump -v kt ' + rd_rest + ' | grep \"kt.*=\" | cut -d\'=\' -f2 | sed -e \"s/[^0-9]//g\"').read()
@@ -394,6 +378,8 @@ def buildnml(case, caseroot, compname):
             lastkt = int(Rlastkt)
             ndastp = int(Rndastp)
             rstart = ".true."
+            trcrstart = ".true."
+            bfmini = True
             rstctl = 2
 
         if continue_run == False and run_type == "branch":
