@@ -2,9 +2,14 @@
 
 <entry_id version="3.0">
   <description modifier_mode="*">
-    <desc ocn="NEMO[%L50][%L75]">NEMO version 4.2.0</desc>
+    <desc ocn="NEMO[%L50][%L75][%BFM][%TRC][%OBGC]">NEMO version 4.2.0</desc>
+    <!-- vertical grid -->
     <desc option="L50"    >50 vertical levels configuration</desc>
     <desc option="L75"    >75 vertical levels configuration</desc>
+    <!-- top confoguration -->
+    <desc option="BFM"    >Ocean Biogeochemistry</desc>
+    <desc option="TRC"    >Seawater age and Inert tracers: cfc-12, sf-6</desc>
+    <desc option="OBGC"   >All components (top+bfm)</desc>
   </description>
 
   <entry id="COMP_OCN">
@@ -42,11 +47,16 @@
 
   <entry id="NEMO_TOP_MODULES">
     <type>char</type>
-    <valid_values> bfm,age,cfc,c14</valid_values> 
+    <valid_values> bfm,trc,obgc</valid_values> 
     <default_value></default_value> 
+    <values match="last">
+      <value compset="_NEMO.*%BFM"   >bfm</value>
+      <value compset="_NEMO.*%TRC"   >trc</value>
+      <value compset="_NEMO.*%OBGC"  >obgc</value>
+    </values>
     <group>build_component_nemo</group>
     <file>env_build.xml</file>
-    <desc>Activte NEMO passive tracers and ocean biogeochemistry. Valid values are Any combination of: bfm age cfc</desc>
+    <desc>Activate NEMO passive tracers and ocean biogeochemistry. Valid values are Any combination of: bfm trc obgc(=all)</desc>
   </entry>
 
   <help>

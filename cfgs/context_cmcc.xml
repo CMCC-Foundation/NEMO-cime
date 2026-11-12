@@ -1,5 +1,19 @@
 <context id="nemo">
 
+<variable_definition>
+   <!-- Year/Month/Day of time origin for NetCDF files; defaults to 1800-01-01 -->
+   <variable id="ref_year"  type="int"> 1900 </variable>
+   <variable id="ref_month" type="int"> 01 </variable>
+   <variable id="ref_day"   type="int"> 01 </variable>
+   <variable id="rho0"      type="float" > 1026.0 </variable>
+   <variable id="cpocean"   type="float" > 3996.0 </variable>
+   <variable id="convSpsu"  type="float" > 0.99530670233846  </variable>
+   <variable id="rhoic"     type="float" > 917.0 </variable>
+   <variable id="rhosn"     type="float" > 330.0 </variable>
+   <variable id="missval"   type="float" > 1.e20 </variable>
+   <variable id="mwC"      type="float" > 12.0  </variable>
+</variable_definition>
+
 <!-- CMCC additonal fields for NEMO physics -->
 
 <field_definition level="1" prec="4" operation="average" enabled=".TRUE." default_value="1.e20" > <!-- time step automaticaly defined -->
@@ -23,6 +37,10 @@
     <field id="toce_e3t_700"      field_ref="toce_e3t"          unit="degree_C"     grid_ref="grid_T_zoom_700"      detect_missing_value="true" />
     <field id="toce_e3t_vsum700"  field_ref="toce_e3t_700"      unit="degress_C*m"  grid_ref="grid_T_vsum700"  detect_missing_value="true" />
     <field id="toce_vmean700"     field_ref="toce_e3t_vsum700"  unit="degree_C"     grid_ref="grid_T_vsum700"  detect_missing_value="true" > toce_e3t_vsum700/e3t_vsum700 </field>
+
+    <field id="e3t_1000"      field_ref="e3t"                       grid_ref="grid_T_zoom_1000"  detect_missing_value="true" />
+    <field id="soce_e3t_1000"  field_ref="soce_e3t"  unit="1e-3"     grid_ref="grid_T_zoom_1000"  detect_missing_value="true" />
+    <field id="toce_e3t_1000"  field_ref="toce_e3t"  unit="degree_C" grid_ref="grid_T_zoom_1000"  detect_missing_value="true" />
 
     <field id="14d"          long_name="Depth of 14C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   />
     <field id="17d"          long_name="Depth of 17C isotherm"                          standard_name="depth_of_isosurface_of_sea_water_potential_temperature"                            unit="m"   />
@@ -128,6 +146,11 @@
   <grid id="grid_T_zoom_700">
     <domain domain_ref="grid_T" />
     <axis axis_ref="deptht700" />
+  </grid>
+
+  <grid id="grid_T_zoom_1000">
+    <domain domain_ref="grid_T" />
+    <axis axis_ref="deptht1000" />
   </grid>
 
   <grid id="grid_T_zoom_2000">

@@ -56,6 +56,12 @@ module ocn_comp_nuopc
    USE step           ! NEMO time-stepping                 (stp     routine)
 #endif
 
+#if defined key_cpl_carbon_cycle
+!   use mem_CO2,   ONLY: co2_flux_to_atm
+   use mem,       ONLY: CO2airflux
+   use api_bfm,   ONLY: SEAmask, ZEROS
+#endif
+
 
   ! !PUBLIC MEMBER FUNCTIONS:
   implicit none
@@ -2279,8 +2285,9 @@ contains
     if (itemFlag /= ESMF_STATEITEM_NOTFOUND) then
        call state_getimport(importState, 'Sa_co2prog', work1, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       if (lwp) write(numout,*) 'ocn_import: Sa_co2prog ', work1(1,1)
        co2_x2o(:,:) = c0
-       if (work1 > 0) then
+       if (ANY(work1(:,:) > 0)) then
           n = 0
           do j=Njs0,Nje0
             do i=Nis0,Nie0
@@ -2295,8 +2302,9 @@ contains
     if (itemFlag /= ESMF_STATEITEM_NOTFOUND) then
        call state_getimport(importState, 'Sa_co2diag', work1, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       if (lwp) write(numout,*) 'ocn_import: Sa_co2diag ', work1(1,1)
        co2_x2o(:,:) = c0
-       if (work1 > 0) then
+       if (ANY(work1(:,:) > 0)) then
          n = 0
          do j=Njs0,Nje0
             do i=Nis0,Nie0
@@ -3028,6 +3036,7 @@ contains
     integer                  :: ji,jj                                 ! indices
     logical, save            :: first = .true.                            ! only true for first call
     integer                  :: n, lev
+    real(wp), parameter      :: mwco2       =  44._wp             ! molecular weight co2
 
     !-----------------------------------------------------------------------
     ! zero buffer if this is the first time after a coupling interval
@@ -3136,6 +3145,25 @@ contains
 !             end do
 !          end do
 !    end if
+
+#if defined key_cpl_carbon_cycle
+   ! Notes on co2 flux treatment
+   ! In BFM, flux is positive when entering the ocean
+   ! In CAM, flux is positive when entering the atmosphere (source),
+   ! but the field received from the coupler in CAM is sign changed (atm_comp_mct.F90 at L. 840)
+   !
+   ! Here we keep the original sign of BFM co2 flux, which is then reversed in atm_comp_mct.F90
+   !
+   !if ( co2_flux_to_atm ) then
+       WORK(:,:) = c0
+       WORK(:,:) = unpack(CO2airflux,SEAmask(:,:,1),ZEROS(:,:,1))
+       ! scale from mmolC/m2/day to kgCO2/m^2/s
+       WORK(:,:) = WORK(:,:) * mwco2 / 86400._wp * 1e-06
+       
+       sbuff_sum_co2(:,:) =  sbuff_sum_co2(:,:) + delt*WORK(:,:)
+   !endif
+#endif
+
 
     first = .false.
 

@@ -87,6 +87,12 @@ CONTAINS
 
 #if defined key_cpl_carbon_cycle
       ALLOCATE( co2_x2o(jpi,jpj), STAT=ierr(2) )
+      !IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: use cpl_carbon_cycle'
+      !IF ( co2_flux_to_atm ) then
+      !    IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: atmosphere co2 cycle is prognostic'
+      !ELSE
+      !    IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: atmosphere co2 cycle is diagnostic'
+      !ENDIF
 #endif
       !
       istat = MAXVAL( ierr )
@@ -248,6 +254,10 @@ CONTAINS
          emp(:,:)  = emp(:,:) -zrnfex
 !         IF (lwp) WRITE(numout,*) ' RNF REDIST ',zrnfex
       END IF
+
+      ! water flux for passive tracers [Kg/m2/s]
+      ! need to change sing here as in TOP/TRP/trcsbc.F90:134 it is applied with a negative sign
+      fmmflx(:,:) = - meltw_x2o(:,:)
 
       ! 3. Salt Flux from cpl  [(Kg*psu)/(m^2 s)]
       sfx(:,:) = salt_x2o(:,:)
