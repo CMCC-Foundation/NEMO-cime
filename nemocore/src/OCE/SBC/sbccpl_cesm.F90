@@ -51,9 +51,7 @@ MODULE sbccpl_cesm
    REAL(wp), ALLOCATABLE, SAVE, PUBLIC, DIMENSION(:,:) :: ifrac_x2o
    REAL(wp), ALLOCATABLE, SAVE, PUBLIC, DIMENSION(:,:) :: pslv_x2o
    REAL(wp), ALLOCATABLE, SAVE, PUBLIC, DIMENSION(:,:) :: duu10n_x2o
-#if defined key_cpl_carbon_cycle
    REAL(wp), ALLOCATABLE, SAVE, PUBLIC, DIMENSION(:,:) :: co2_x2o
-#endif
 
    LOGICAL, SAVE, PUBLIC :: lrecv
 
@@ -85,15 +83,8 @@ CONTAINS
                 STAT=ierr(1) )
       !
 
-#if defined key_cpl_carbon_cycle
       ALLOCATE( co2_x2o(jpi,jpj), STAT=ierr(2) )
-      !IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: use cpl_carbon_cycle'
-      !IF ( co2_flux_to_atm ) then
-      !    IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: atmosphere co2 cycle is prognostic'
-      !ELSE
-      !    IF (lwp) WRITE(numout,*) 'sbc_cpl_cesm_init: atmosphere co2 cycle is diagnostic'
-      !ENDIF
-#endif
+
       !
       istat = MAXVAL( ierr )
       IF( lk_mpp    )   CALL mpp_sum ( 'sbccpl_cesm', istat )
@@ -132,10 +123,8 @@ CONTAINS
       fr_i       = 0.0_wp
       wndm       = 0.0_wp
       apr        = 0.0_wp
-#if defined key_cpl_carbon_cycle
       co2_x2o    = 0.0_wp
       atm_co2    = 0.0_wp
-#endif
 
    END SUBROUTINE sbc_cpl_cesm_init
 
@@ -292,10 +281,8 @@ CONTAINS
       ! 6. atmospheric pressure and convert from Pa to hPa
       apr(:,:) = pslv_x2o(:,:)*0.01_wp*tmask(:,:,1)
 
-#if defined key_cpl_carbon_cycle
       ! 7. atmospheric co2
       atm_co2(:,:) = co2_x2o(:,:)*tmask(:,:,1)
-#endif
 
       ! LBC (halo) update
       call lbc_lnk( 'sbccpl_cesm',                           &
@@ -308,9 +295,7 @@ CONTAINS
 
       IF ( ln_rnf ) call lbc_lnk('sbccpl_cesm', rnf(:,:), 'T', 1._wp)
 
-#if defined key_cpl_carbon_cycle
       call lbc_lnk('sbccpl_cesm', atm_co2(:,:), 'T', 1._wp)
-#endif
 
       ! Reset coupling time step flag
       lrecv = .FALSE.
@@ -337,9 +322,7 @@ CONTAINS
    IF (ALLOCATED(ifrac_x2o))  DEALLOCATE(ifrac_x2o)
    IF (ALLOCATED(pslv_x2o))   DEALLOCATE(pslv_x2o)
    IF (ALLOCATED(duu10n_x2o)) DEALLOCATE(duu10n_x2o)
-#if defined key_cpl_carbon_cycle
    IF (ALLOCATED(co2_x2o))    DEALLOCATE(co2_x2o)
-#endif
    END SUBROUTINE sbc_cpl_cesm_finalize
 
 #else

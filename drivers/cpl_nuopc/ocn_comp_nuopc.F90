@@ -56,8 +56,7 @@ module ocn_comp_nuopc
    USE step           ! NEMO time-stepping                 (stp     routine)
 #endif
 
-#if defined key_cpl_carbon_cycle
-!   use mem_CO2,   ONLY: co2_flux_to_atm
+#if defined BFM_NEMO
    use mem,       ONLY: CO2airflux
    use api_bfm,   ONLY: SEAmask, ZEROS
 #endif
@@ -153,6 +152,9 @@ module ocn_comp_nuopc
   real (wp) :: tlast_coupled
 
   real (wp), save ::  area
+
+  ! send ocean co2 flux to the coupler for atmosphere
+  logical :: send_co2_to_atm = .false.
 
 !=======================================================================
 contains
@@ -1714,10 +1716,11 @@ contains
        write(numout,'(a)') trim(subname)//'flds_co2c = '// trim(cvalue)
     end if
 
-    if (flds_co2a .or. flds_co2c) then
+    if (flds_co2a .or. flds_co2b .or. flds_co2c) then
        call fldlist_add(fldsToOcn_num, fldsToOcn, 'Sa_co2diag')
        call fldlist_add(fldsToOcn_num, fldsToOcn, 'Sa_co2prog')
     end if
+    if (flds_co2c) send_co2_to_atm = .true.
 
     do n = 1,fldsToOcn_num
        call NUOPC_Advertise(importState, standardName=fldsToOcn(n)%stdname, &
@@ -2013,9 +2016,11 @@ contains
     real (wp), pointer   :: faxa_rain(:)
     real (wp), pointer   :: faxa_snow(:)
     real (wp), pointer   :: faxa_lwdn(:)
-    real (wp), pointer   :: faxa_dstwet(:,:)
-    real (wp), pointer   :: faxa_dstdry(:,:)
-    real (wp), pointer   :: faxa_bcph(:,:)
+    real (wp), pointer   :: faxa_dstwet(:)
+    real (wp), pointer   :: faxa_dstdry(:)
+    real (wp), pointer   :: faxa_bcph(:)
+    real (wp), pointer   :: sa_co2diag(:)
+    real (wp), pointer   :: sa_co2prog(:)
     ! from ice
     real (wp), pointer   :: sf_afrac(:)
     real (wp), pointer   :: sf_afracr(:)
@@ -2279,20 +2284,19 @@ contains
     !-----------------------------------------------------------------------
     ! CO2 from atm
     !-----------------------------------------------------------------------
+    co2_x2o(:,:) = c0
 
-#if defined key_cpl_carbon_cycle
     call ESMF_StateGet(importState, 'Sa_co2prog', itemFlag, rc=rc)
     if (itemFlag /= ESMF_STATEITEM_NOTFOUND) then
-       call state_getimport(importState, 'Sa_co2prog', work1, rc=rc)
+       call state_getfldptr(importState, 'Sa_co2prog', sa_co2prog, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       if (lwp) write(numout,*) 'ocn_import: Sa_co2prog ', work1(1,1)
-       co2_x2o(:,:) = c0
-       if (ANY(work1(:,:) > 0)) then
+       if (ANY(sa_co2prog(:) > 0)) then
+          !write(numout,*) subname//' : import Sa_co2prog'
           n = 0
           do j=Njs0,Nje0
             do i=Nis0,Nie0
               n = n + 1
-              co2_x2o(i,j) = work1(i,j) 
+              co2_x2o(i,j) = sa_co2prog(n)
             enddo
           enddo
        endif
@@ -2300,21 +2304,19 @@ contains
 
     call ESMF_StateGet(importState, 'Sa_co2diag', itemFlag, rc=rc)
     if (itemFlag /= ESMF_STATEITEM_NOTFOUND) then
-       call state_getimport(importState, 'Sa_co2diag', work1, rc=rc)
+       call state_getfldptr(importState, 'Sa_co2diag', sa_co2diag, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       if (lwp) write(numout,*) 'ocn_import: Sa_co2diag ', work1(1,1)
-       co2_x2o(:,:) = c0
-       if (ANY(work1(:,:) > 0)) then
-         n = 0
-         do j=Njs0,Nje0
-            do i=Nis0,Nie0
-               n = n + 1
-               co2_x2o(i,j) = work1(i,j) 
-            enddo
-         enddo
+       if (ANY(sa_co2diag(:) > 0)) then
+          !write(numout,*) subname//' : import Sa_co2diag'
+          n = 0
+          do j=Njs0,Nje0
+             do i=Nis0,Nie0
+                n = n + 1
+                co2_x2o(i,j) = sa_co2diag(n)
+             enddo
+          enddo
        endif
     endif
-#endif
 
     ! coupling time step flag
     lrecv = .TRUE.
@@ -3146,7 +3148,7 @@ contains
 !          end do
 !    end if
 
-#if defined key_cpl_carbon_cycle
+#if defined BFM_NEMO
    ! Notes on co2 flux treatment
    ! In BFM, flux is positive when entering the ocean
    ! In CAM, flux is positive when entering the atmosphere (source),
@@ -3154,14 +3156,14 @@ contains
    !
    ! Here we keep the original sign of BFM co2 flux, which is then reversed in atm_comp_mct.F90
    !
-   !if ( co2_flux_to_atm ) then
+   if ( send_co2_to_atm ) then
        WORK(:,:) = c0
        WORK(:,:) = unpack(CO2airflux,SEAmask(:,:,1),ZEROS(:,:,1))
        ! scale from mmolC/m2/day to kgCO2/m^2/s
        WORK(:,:) = WORK(:,:) * mwco2 / 86400._wp * 1e-06
        
        sbuff_sum_co2(:,:) =  sbuff_sum_co2(:,:) + delt*WORK(:,:)
-   !endif
+   endif
 #endif
 
 
