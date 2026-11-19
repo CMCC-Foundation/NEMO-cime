@@ -355,6 +355,7 @@ CONTAINS
       !!
       INTEGER  :: ji, jj, jk, jn, jl             ! Loop index
       REAL(wp) :: zfact, zrnf
+      LOGICAL  :: lwriter
       !!---------------------------------------------------------------------
       !
       IF( ln_timing )   CALL timing_start('trc_bc')
@@ -365,24 +366,27 @@ CONTAINS
          WRITE(numout,*) '~~~~~~~ '
       ENDIF
 
+      lwriter = .false.
+      IF ( (kt-nit000)<100 .OR. MOD(kt,200)==0 .OR. kt==nitend ) lwriter = .true.
+
       ! 1. Update Boundary conditions data
       IF( PRESENT(jit) ) THEN 
          !
          ! BDY: use pt_offset=0.5 as applied at the end of the step and fldread is referenced at the middle of the step
          IF( nb_trcobc > 0 ) THEN
-           if (lwp) write(numout,'(a,i5,a,i10)') '   reading OBC data for ', nb_trcobc ,' variable(s) at step ', kt
+           if (lwp .and. lwriter) write(numout,'(a,i5,a,i10)') '   reading OBC data for ', nb_trcobc ,' variable(s) at step ', kt
            CALL fld_read( kt=kt, kn_fsbc=1, sd=sf_trcobc, kit=jit, pt_offset = 0.5_wp )
          ENDIF
          !
          ! SURFACE boundary conditions
          IF( nb_trcsbc > 0 ) THEN
-           if (lwp) write(numout,'(a,i5,a,i10)') '   reading SBC data for ', nb_trcsbc ,' variable(s) at step ', kt
+           if (lwp .and. lwriter) write(numout,'(a,i5,a,i10)') '   reading SBC data for ', nb_trcsbc ,' variable(s) at step ', kt
            CALL fld_read( kt=kt, kn_fsbc=1, sd=sf_trcsbc, kit=jit)
          ENDIF
          !
          ! COASTAL boundary conditions
          IF( nb_trccbc > 0 ) THEN
-           if (lwp) write(numout,'(a,i5,a,i10)') '   reading CBC data for ', nb_trccbc ,' variable(s) at step ', kt
+           if (lwp .and. lwriter) write(numout,'(a,i5,a,i10)') '   reading CBC data for ', nb_trccbc ,' variable(s) at step ', kt
            CALL fld_read( kt=kt, kn_fsbc=1, sd=sf_trccbc, kit=jit)
          ENDIF
          !
@@ -390,19 +394,19 @@ CONTAINS
          !
          ! BDY: use pt_offset=0.5 as applied at the end of the step and fldread is referenced at the middle of the step
          IF( nb_trcobc > 0 ) THEN
-           if (lwp) write(numout,'(a,i5,a,i10)') '   reading OBC data for ', nb_trcobc ,' variable(s) at step ', kt
+           if (lwp .and. lwriter) write(numout,'(a,i5,a,i10)') '   reading OBC data for ', nb_trcobc ,' variable(s) at step ', kt
            CALL fld_read( kt=kt, kn_fsbc=1, sd=sf_trcobc, pt_offset = 0.5_wp )
          ENDIF
          !
          ! SURFACE boundary conditions
          IF( nb_trcsbc > 0 ) THEN
-           if (lwp) write(numout,'(a,i5,a,i10)') '   reading SBC data for ', nb_trcsbc ,' variable(s) at step ', kt
+           if (lwp .and. lwriter) write(numout,'(a,i5,a,i10)') '   reading SBC data for ', nb_trcsbc ,' variable(s) at step ', kt
            CALL fld_read( kt=kt, kn_fsbc=1, sd=sf_trcsbc )
          ENDIF
          !
          ! COASTAL boundary conditions
          IF( nb_trccbc > 0 ) THEN
-           if (lwp) write(numout,'(a,i5,a,i10)') '   reading CBC data for ', nb_trccbc ,' variable(s) at step ', kt
+           if (lwp .and. lwriter) write(numout,'(a,i5,a,i10)') '   reading CBC data for ', nb_trccbc ,' variable(s) at step ', kt
            CALL fld_read( kt=kt, kn_fsbc=1, sd=sf_trccbc )
          ENDIF
          !

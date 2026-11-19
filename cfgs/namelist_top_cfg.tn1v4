@@ -1,0 +1,107 @@
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! NEMO/TOP :   Reference namelist 
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+!-----------------------------------------------------------------------
+&namtrc_run 
+!-----------------------------------------------------------------------       
+    ln_top_euler   =  .true.         
+    ln_rsttr       =  .false.        
+    nn_rsttr       =  0              
+    cn_trcrst_in   =  'restart_trc'  
+    cn_trcrst_out  =  'restart_trc'  
+/                  
+
+!-----------------------------------------------------------------------
+&namtrc           
+!-----------------------------------------------------------------------
+   ln_age        =  .false.     !  Run the sea water age tracer
+   ln_cfc12      =  .false.     !  Run the CFC12 passive tracer
+   ln_sf6        =  .false.     !  Run the SF6 passive tracer
+
+    sn_tracer(1)  =  'DUMMY'  'Dummy tracer'  'dummy units'  .false.  .false.  
+/                 
+
+
+!-----------------------------------------------------------------------
+&namage          !   AGE 
+!-----------------------------------------------------------------------
+   rn_age_depth      = 10            ! depth over which age tracer reset to zero
+   rn_age_kill_rate  = -0.000138888  !  = -1/7200 recip of relaxation timescale (s) for  age tracer shallower than age_depth
+/
+
+!-----------------------------------------------------------------------
+&namtrc_dta      !    Initialisation from data input file
+!-----------------------------------------------------------------------
+/
+
+!-----------------------------------------------------------------------
+&namtrc_adv 
+!-----------------------------------------------------------------------
+    ln_trcadv_muscl   =  .true.   
+/                     
+
+
+!-----------------------------------------------------------------------
+&namtrc_ldf       
+!-----------------------------------------------------------------------   
+   ln_trcldf_tra   =  .true.    !  use active tracer setting     
+/                    
+
+
+!-----------------------------------------------------------------------
+&namtrc_rad
+!-----------------------------------------------------------------------    
+    ln_trcrad  =  .true.  
+/              
+
+
+
+! namtrc_dmp !-------------------------------------------------------------------------!
+!   Not used with BFM
+!   passive tracer newtonian damping
+!-------------------------------------------------------------------------!
+&namtrc_dmp  
+/            
+
+
+
+! namtrc_ice  ! tracer concentration in sea ice 
+!    =-1 (no vvl: identical cc in ice and ocean / vvl: cc_ice = 0)
+!    = 0 (no vvl: cc_ice = zero / vvl: cc_ice = )
+!    = 1 prescribed to a namelist value (implemented in pisces only)
+!-------------------------------------------------------------------------!
+&namtrc_ice    
+    nn_ice_tr  =  -1  
+/              
+
+
+
+! namtrc_trd !-------------------------------------------------------------------------!
+!   Not used with BFM
+!   diagnostics on tracer trends        ('key_trdtrc')
+!          or mixed-layer trends          ('key_trdmld_trc')
+!-------------------------------------------------------------------------!
+&namtrc_trd  
+/            
+
+
+
+! namtrc_dta !-------------------------------------------------------------------------!
+!   Initialisation from data input file
+!   for each BFM variable set the structure sn_trcdta(VARNAME)
+!   !  file name    ! frequency (hours) ! variable   ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea
+!   !               !  (if <0  months)  !   name     !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! mask
+!   and the conversion factor rn_trfac(VARNAME)
+!-------------------------------------------------------------------------!
+&namtrc_dta        
+
+
+
+
+!-----------------------------------------------------------------------
+&namtrc_bc         
+!-----------------------------------------------------------------------
+/
+
+
