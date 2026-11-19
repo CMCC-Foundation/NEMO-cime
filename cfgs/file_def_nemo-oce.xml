@@ -15,18 +15,7 @@
       <file_group id="4h"  output_freq="4h"  output_level="10" enabled=".TRUE."/> <!-- 4h files -->
       <file_group id="6h"  output_freq="6h"  output_level="10" enabled=".TRUE."/> <!-- 6h files -->     
 
-      <file_group id="1d" output_freq="1d" output_level="10" enabled=".FALSE.">  <!-- 5d files -->   
-        <file id="file01" name_suffix="_grid_T" description="ocean T grid variables" >
-          <field field_ref="sst"          name="tos"    />
-          <field field_ref="sss"          name="sos"    />
-          <field field_ref="ssh"          name="zos"    />
-          <field field_ref="mldr0_3"      name="mlotst" />
-	  <field field_ref="empmr"        name="wfo"      />
-          <field field_ref="runoffs"      name="runoffs"  />
-	  <field field_ref="qsr"          name="qsr"      />
-	</file>
-
-      </file_group>
+      <file_group id="1d" output_freq="1d" output_level="10" enabled=".FALSE."/>  <!-- 1d files -->   
 
       <file_group id="5d" output_freq="5d"  output_level="10" enabled=".TRUE."/>  <!-- 5d files -->   
 
@@ -59,6 +48,7 @@
 	  <field field_ref="taum"         name="taum"     />
 	  <field field_ref="wspd"         name="windsp"   />
 	  <field field_ref="precip"       name="precip"   />
+          <field field_ref="toce_lev_200" name="tocelev200" />
 	  <!-- ice and snow -->
 	  <field field_ref="ice_cover" />
           <!-- NCAR CESM2 coupling fileds -->
