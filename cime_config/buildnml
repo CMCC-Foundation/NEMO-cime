@@ -379,6 +379,7 @@ def buildnml(case, caseroot, compname):
             ndastp = int(Rndastp)
             rstart = ".true."
             trcrstart = ".true."
+            tsdini = ".false."
             bfmini = True
             rstctl = 2
 
