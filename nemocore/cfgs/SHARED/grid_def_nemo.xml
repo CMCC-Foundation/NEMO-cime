@@ -228,11 +228,6 @@
   -->
 
 
-  <grid id="grid_T_zoom_300">
-    <domain domain_ref="grid_T" />
-    <axis axis_ref="deptht300" />
-  </grid>
-
   <grid id="grid_U_scalar" >
     <domain domain_ref="grid_U" />
     <scalar/>
