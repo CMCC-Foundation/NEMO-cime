@@ -27,6 +27,7 @@ MODULE diaptr
    USE iom              ! IOM library
    USE in_out_manager   ! I/O manager
    USE lib_mpp          ! MPP library
+   USE lbclnk           ! ocean lateral boundary conditions (or mpp link)
    USE timing           ! preformance summary
 
    IMPLICIT NONE
@@ -317,8 +318,19 @@ CONTAINS
          ENDIF
          !
          IF( iom_use( 'uocetr_vsum_cumul' ) ) THEN
-            CALL iom_get_var(  'uocetr_vsum_op', z2d ) ! get uocetr_vsum_op from xml
-            z2d(:,:) = ptr_ci_2d( z2d(:,:) )
+            ! Vertically summed i-transport at the current time level, e2u * sum_k( uu * e3u ): the same
+            ! quantity as the XIOS field uocetr_vsum. It is cumulated along j at every time step and XIOS
+            ! takes the temporal mean (operation="average" in the field definition). The cumulation is
+            ! linear, so mean(cumul(x)) = cumul(mean(x)): no read-back of a monthly mean from XIOS is needed.
+            z2d(:,:) = 0._wp
+            DO jk = 1, jpkm1
+               DO jj = 1, jpj
+                  DO ji = 1, jpi
+                     z2d(ji,jj) = z2d(ji,jj) + uu(ji,jj,jk,Kmm) * e3u(ji,jj,jk,Kmm)
+                  END DO
+               END DO
+            END DO
+            z2d(:,:) = ptr_ci_2d( z2d(:,:) * e2u(:,:) )
             CALL iom_put( 'uocetr_vsum_cumul', z2d )
          ENDIF
          !
@@ -735,6 +747,9 @@ CONTAINS
          DO_2D( 0, 0, 0, 0 )
             p_fval(ji,jj) = p_fval(ji,jj-1) + pva(ji,jj) * tmask_i(ji,jj)
          END_2D
+         ! pass the cumulated value of the last row of each subdomain to its northern neighbour: after
+         ! jpnj passes the cumulation is continuous across all the subdomains of a column of processors
+         CALL lbc_lnk( 'diaptr', p_fval, 'U', -1.0_wp )
       END DO
       !
    END FUNCTION ptr_ci_2d

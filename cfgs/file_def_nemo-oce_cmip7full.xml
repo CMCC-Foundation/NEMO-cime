@@ -136,7 +136,7 @@
 	  <field field_ref="uoce"         name="uo"        long_name="Sea Water X Velocity"       unit="m s-1" operation="instant" freq_op="1mo" > @uoce_e3u / @e3u </field>
 	  <field field_ref="utau"         name="tauuo"     long_name="Surface Downward X Stress"  unit="N m-2" />
           <field field_ref="uocetr_eff"   name="umo"       long_name='Ocean Mass X Transport'     unit="kg s-1" operation="instant" freq_op="1mo" > @uocetr_eff_e3u / @e3u * $rho0 </field>
-          <!-- <field field_ref="msftbarot"    name="msftbarot"/> -->
+          <field field_ref="msftbarot" name="msftbarot" long_name="Ocean Barotropic Mass Streamfunction" unit="kg s-1" operation="average" />
 	</file>
 	
 	<file id="file32" name_suffix="_grid_V" description="ocean V grid variables" >
