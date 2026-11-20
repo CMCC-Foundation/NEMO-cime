@@ -32,6 +32,7 @@
    cn_ocerst_out = "restart"   !  suffix of ocean restart name (output)
    cn_ocerst_outdir = "."      !  directory in which to write output ocean restarts
    nn_stock    =  0            !  frequency of creation of a restart file (modulo referenced to 1)
+   ln_mskland  = .true.        !  mask land points in NetCDF outputs
    ln_clobber  = .true.        !  clobber (overwrite) an existing file
 /
 !-----------------------------------------------------------------------
